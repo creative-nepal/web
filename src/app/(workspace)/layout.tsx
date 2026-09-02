@@ -19,6 +19,7 @@ import { BusinessSwitcher } from "@/features/business/components/business-switch
 import { WorkspaceTheme } from "@/features/business/components/workspace-theme";
 import { useWorkspace } from "@/features/business/hooks/use-workspace";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
 
 function WorkspaceChrome({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -54,7 +55,12 @@ function WorkspaceChrome({ children }: { children: React.ReactNode }) {
       navItems={items}
       header={
         <div className="flex flex-col gap-2">
-          <BusinessSwitcher />
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <BusinessSwitcher />
+            </div>
+            <NotificationBell />
+          </div>
           <BranchSwitcher />
         </div>
       }
