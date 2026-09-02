@@ -1,0 +1,25 @@
+/*
+ * Brand overrides for this deployment.
+ *
+ * This is the ONE stylesheet a template clone edits. `src/styles/globals.css`
+ * is the shared design system, byte-identical across web and admin and synced
+ * by `scripts/sync-ui.sh` — overriding tokens there would drift on every sync.
+ * Everything here loads after it, so these values win.
+ *
+ * The brand *name* is not here: it comes from the API's i18n catalogue
+ * (`ui.brand.*`), so renaming a clone needs no frontend release.
+ *
+ * Uncomment and set what the vertical needs; leave the rest to inherit.
+ */
+
+:root {
+  /* --primary: oklch(0.55 0.18 250); */
+  /* --primary-foreground: oklch(0.985 0 0); */
+  /* --ring: oklch(0.55 0.18 250); */
+}
+
+.dark {
+  /* --primary: oklch(0.75 0.14 250); */
+  /* --primary-foreground: oklch(0.18 0.02 250); */
+  /* --ring: oklch(0.75 0.14 250); */
+}

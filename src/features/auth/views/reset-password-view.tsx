@@ -28,7 +28,7 @@ export function ResetPasswordView() {
 
   async function handleSubmit(values: ResetPasswordInput) {
     if (!token) {
-      setError("Reset link is missing or invalid.");
+      setError(t("ui.auth.resetTokenMissing"));
       return;
     }
 
@@ -43,7 +43,7 @@ export function ResetPasswordView() {
     setPending(false);
 
     if (resetError) {
-      setError(resetError.message ?? "Unable to reset password");
+      setError(resetError.message ?? t("ui.auth.resetFailed"));
       return;
     }
 

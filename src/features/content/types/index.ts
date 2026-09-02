@@ -43,12 +43,23 @@ export interface CtaBlock {
   buttonHref: string;
 }
 
+export interface PricingBlock {
+  id: string;
+  type: "pricing";
+  heading?: string;
+  subheading?: string;
+  sector?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
 export type ContentBlock =
   | HeroBlock
   | FeaturesBlock
   | RichTextBlock
   | FaqBlock
-  | CtaBlock;
+  | CtaBlock
+  | PricingBlock;
 
 export interface ContentSeo {
   title?: string;

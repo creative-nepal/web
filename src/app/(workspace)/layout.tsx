@@ -10,12 +10,14 @@ import {
 } from "@/components/composed/dashboard-shell";
 import { EmptyState } from "@/components/composed/empty-state";
 import { QueryBoundary } from "@/components/query-boundary";
+import { BranchSwitcher } from "@/features/branches/components/branch-switcher";
 import {
   BusinessProvider,
   useBusinessContext,
 } from "@/features/business/business-provider";
 import { BusinessSwitcher } from "@/features/business/components/business-switcher";
-import { navItemsForSector } from "@/features/business/nav-items";
+import { WorkspaceTheme } from "@/features/business/components/workspace-theme";
+import { useWorkspace } from "@/features/business/hooks/use-workspace";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 
 function WorkspaceChrome({ children }: { children: React.ReactNode }) {
@@ -24,8 +26,9 @@ function WorkspaceChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
   const { currentBusiness, isLoading } = useBusinessContext();
+  const { workspace, isLoading: isWorkspaceLoading } = useWorkspace();
 
-  if (isLoading) {
+  if (isLoading || isWorkspaceLoading) {
     return null;
   }
 
@@ -40,11 +43,8 @@ function WorkspaceChrome({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const items: DashboardShellNavItem[] = navItemsForSector(
-    currentBusiness.sector,
-    t,
-  ).map((item) => ({
-    title: item.title,
+  const items: DashboardShellNavItem[] = (workspace?.nav ?? []).map((item) => ({
+    title: t(item.titleKey),
     href: item.href,
     isActive: pathname.startsWith(item.href),
   }));
@@ -52,12 +52,19 @@ function WorkspaceChrome({ children }: { children: React.ReactNode }) {
   return (
     <DashboardShell
       navItems={items}
-      header={<BusinessSwitcher />}
+      header={
+        <div className="flex flex-col gap-2">
+          <BusinessSwitcher />
+          <BranchSwitcher />
+        </div>
+      }
       open={open}
       onOpenChange={setOpen}
       renderLink={(item, button) => <Link href={item.href}>{button}</Link>}
     >
-      <QueryBoundary>{children}</QueryBoundary>
+      <WorkspaceTheme>
+        <QueryBoundary>{children}</QueryBoundary>
+      </WorkspaceTheme>
     </DashboardShell>
   );
 }

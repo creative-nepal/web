@@ -58,15 +58,15 @@ export function ReceiveDialog({
       void queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success(
         result.order.status === "received"
-          ? "Order fully received"
-          : "Partial receipt recorded",
+          ? t("ui.web.purchasing.receivedFull")
+          : t("ui.web.purchasing.receivedPartial"),
       );
       onClose();
     },
     onError: (error) => {
       const message =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ?? "Could not record receipt";
+          ?.data?.message ?? t("ui.web.purchasing.receiveFailed");
       toast.error(message);
     },
   });
@@ -122,7 +122,9 @@ export function ReceiveDialog({
             Object.values(quantities).every((qty) => qty <= 0)
           }
         >
-          {receive.isPending ? "Recording..." : "Record receipt"}
+          {receive.isPending
+            ? t("ui.web.purchasing.recording")
+            : t("ui.web.purchasing.recordReceipt")}
         </Button>
       </div>
     </ContentDialog>

@@ -68,3 +68,17 @@ bun run dev              # port 3000; needs creative-nepal-api on NEXT_PUBLIC_AP
 ```
 
 bun only — no npm/yarn/pnpm; generators via `bunx`.
+
+## Navigation, permissions and sector labels come from the server
+
+- The workspace sidebar renders whatever `GET /api/v1/businesses/:id/workspace` returns
+  (`features/business/hooks/use-workspace`). There is no local nav list — a new screen gets its
+  entry by adding a nav item to that sector's `meta.ts` in `creative-nepal-api`, with the
+  permission it requires. Adding a route here without that entry gives a page nobody can reach.
+- Gate UI on `usePermission({ invoice: ["print"] })`, which reads the effective permissions from
+  that same response. **Never read `session.user.role`** — that is the *platform* admin role, a
+  different axis from business membership; the old hook did, and defaulted to granting everything.
+- Sector names come from `t(\`common.sector.${sector}\`)`, not a local label map.
+- The active branch travels as an `X-Branch-Id` header added by `lib/api.ts` from the branch
+  store. Feature services never pass it themselves; omitting it lets the API fall back to the
+  business's default branch.

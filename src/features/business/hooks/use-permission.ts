@@ -1,26 +1,19 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
-import { useBusinessContext } from "../business-provider";
+import { useWorkspace } from "./use-workspace";
 
-type PermissionRequest = Record<string, string[]>;
+export type PermissionRequest = Record<string, string[]>;
 
-export function usePermission(permissions: PermissionRequest): boolean {
-  const { currentBusiness } = useBusinessContext();
-  const { data: session } = authClient.useSession();
+export function usePermission(required: PermissionRequest): boolean {
+  const { workspace } = useWorkspace();
 
-  if (!currentBusiness || !session) {
+  if (!workspace) {
     return false;
   }
 
-  const role = (session.user as { role?: string | null }).role;
-
-  if (!role) {
-    return true;
-  }
-
-  return authClient.organization.checkRolePermission({
-    role: role as never,
-    permissions: permissions as never,
-  });
+  return Object.entries(required).every(([resource, actions]) =>
+    actions.every((action) =>
+      workspace.permissions[resource]?.includes(action),
+    ),
+  );
 }

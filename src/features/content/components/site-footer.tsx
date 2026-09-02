@@ -1,7 +1,13 @@
 import Link from "next/link";
+import { getTranslations } from "@/features/i18n/server";
 import type { ContentNavigation } from "../types";
 
-export function SiteFooter({ navigation }: { navigation: ContentNavigation }) {
+export async function SiteFooter({
+  navigation,
+}: {
+  navigation: ContentNavigation;
+}) {
+  const { t } = await getTranslations();
   const year = new Date().getFullYear();
   const hasGroups = navigation.footer.length > 0;
 
@@ -45,7 +51,7 @@ export function SiteFooter({ navigation }: { navigation: ContentNavigation }) {
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>{navigation.tagline}</span>
           <span>
-            © {year} {navigation.copyright ?? "Creative Nepal"}
+            © {year} {navigation.copyright ?? t("ui.brand.name")}
           </span>
         </div>
       </div>

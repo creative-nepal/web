@@ -25,13 +25,14 @@ import {
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import { useAssignableRoles } from "@/features/roles/hooks/use-assignable-roles";
 import { authClient } from "@/lib/auth-client";
-import { ROLE_HELP, ROLE_LABELS, ROLES_BY_SECTOR } from "../constants";
 
 export function StaffView() {
   const { t } = useTranslation();
 
   const business = useCurrentBusiness();
+  const roles = useAssignableRoles();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("cashier");
@@ -72,8 +73,6 @@ export function StaffView() {
     return null;
   }
 
-  const roles = ROLES_BY_SECTOR[business.sector] ?? ["manager", "cashier"];
-
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -92,18 +91,15 @@ export function StaffView() {
         <Select
           value={role}
           onValueChange={(value) => setRole(value ?? "cashier")}
-          items={roles.map((option) => ({
-            value: option,
-            label: ROLE_LABELS[option] ?? option,
-          }))}
+          items={roles}
         >
           <SelectTrigger className="w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {roles.map((option) => (
-              <SelectItem key={option} value={option}>
-                {ROLE_LABELS[option] ?? option}
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -116,7 +112,9 @@ export function StaffView() {
         </Button>
       </div>
 
-      <p className="text-muted-foreground text-sm">{ROLE_HELP[role]}</p>
+      <p className="text-muted-foreground text-sm">
+        {t(`ui.web.staff.roleHelp.${role}`)}
+      </p>
 
       {(members ?? []).length === 0 ? (
         <EmptyState

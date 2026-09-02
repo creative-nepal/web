@@ -3,6 +3,7 @@ import { CtaBlockView } from "./blocks/cta-block";
 import { FaqBlockView } from "./blocks/faq-block";
 import { FeaturesBlockView } from "./blocks/features-block";
 import { HeroBlockView } from "./blocks/hero-block";
+import { PricingBlockView } from "./blocks/pricing-block";
 import { RichTextBlockView } from "./blocks/rich-text-block";
 
 function renderBlock(block: ContentBlock) {
@@ -17,6 +18,8 @@ function renderBlock(block: ContentBlock) {
       return <FaqBlockView key={block.id} block={block} />;
     case "cta":
       return <CtaBlockView key={block.id} block={block} />;
+    case "pricing":
+      return <PricingBlockView key={block.id} block={block} />;
     default: {
       const exhaustive: never = block;
       return exhaustive;

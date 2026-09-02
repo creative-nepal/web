@@ -45,7 +45,7 @@ export function TablesView() {
     onError: (error) => {
       const message =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ?? "Could not bill this table";
+          ?.data?.message ?? t("ui.web.restaurant.billFailed");
       toast.error(message);
     },
   });

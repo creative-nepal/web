@@ -35,7 +35,7 @@ export function ForgotPasswordView() {
     setPending(false);
 
     if (requestError) {
-      setError(requestError.message ?? "Unable to send reset link");
+      setError(requestError.message ?? t("ui.auth.resetLinkFailed"));
       return;
     }
 
@@ -66,7 +66,7 @@ export function ForgotPasswordView() {
               <EmailField name="email" label={t("ui.field.email")} />
               {error && <p className="text-xs text-destructive">{error}</p>}
               <Button type="submit" disabled={pending} className="w-full">
-                {pending ? "Sending…" : "Send reset link"}
+                {pending ? t("ui.auth.sending") : t("ui.auth.sendResetLink")}
               </Button>
             </Form>
           )}

@@ -48,3 +48,42 @@ export interface PurchaseBill {
   paidCents: number;
   status: "unpaid" | "partially_paid" | "paid";
 }
+
+export const DEBIT_NOTE_REASONS = [
+  "return",
+  "damaged",
+  "short_supply",
+  "rate_difference",
+  "other",
+] as const;
+
+export type DebitNoteReason = (typeof DEBIT_NOTE_REASONS)[number];
+
+export interface DebitNoteItem {
+  id: string;
+  productId: string | null;
+  description: string;
+  quantity: string;
+  unitPriceCents: number;
+  vatCents: number;
+  lineTotalCents: number;
+}
+
+export interface DebitNote {
+  id: string;
+  supplierId: string;
+  purchaseBillId: string;
+  noteNumber: number;
+  series: string;
+  reason: DebitNoteReason;
+  note: string | null;
+  subtotalCents: number;
+  vatCents: number;
+  totalCents: number;
+  restocked: boolean;
+  issuedAt: string;
+}
+
+export interface DebitNoteWithItems extends DebitNote {
+  items: DebitNoteItem[];
+}

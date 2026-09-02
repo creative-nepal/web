@@ -2,6 +2,9 @@ import { api } from "@/lib/api";
 import { downloadFile } from "@/lib/download";
 import type { PaginatedResult } from "@/types/api";
 import type {
+  DebitNote,
+  DebitNoteReason,
+  DebitNoteWithItems,
   PurchaseBill,
   PurchaseOrder,
   PurchaseOrderItem,
@@ -152,6 +155,42 @@ export async function recordPayment(
   const { data } = await api.post<PurchaseBill>(
     `/api/v1/businesses/${businessId}/purchase-bills/${billId}/payments`,
     { amountCents },
+  );
+  return data;
+}
+
+export interface IssueDebitNoteInput {
+  reason: DebitNoteReason;
+  note?: string;
+  restock?: boolean;
+  items: Array<{
+    productId?: string;
+    description: string;
+    quantity?: number;
+    unitPriceCents: number;
+    vatCents?: number;
+  }>;
+}
+
+export async function issueDebitNote(
+  businessId: string,
+  billId: string,
+  input: IssueDebitNoteInput,
+): Promise<DebitNoteWithItems> {
+  const { data } = await api.post<DebitNoteWithItems>(
+    `/api/v1/businesses/${businessId}/purchase-bills/${billId}/debit-notes`,
+    input,
+  );
+  return data;
+}
+
+export async function listDebitNotes(
+  businessId: string,
+  params: ListParams & { purchaseBillId?: string } = {},
+): Promise<PaginatedResult<DebitNote>> {
+  const { data } = await api.get<PaginatedResult<DebitNote>>(
+    `/api/v1/businesses/${businessId}/debit-notes`,
+    { params: { limit: 50, ...params } },
   );
   return data;
 }

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/composed/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import { DebitNotesTab } from "../components/debit-notes-tab";
 import { PurchaseBillsTab } from "../components/purchase-bills-tab";
 import { PurchaseOrdersTab } from "../components/purchase-orders-tab";
 import { PurchaseReportsTab } from "../components/purchase-reports-tab";
@@ -21,6 +22,11 @@ export function PurchasingView() {
       value: "bills",
       label: t("ui.web.purchasing.billsTab"),
       Component: PurchaseBillsTab,
+    },
+    {
+      value: "debit-notes",
+      label: t("ui.web.purchasing.debitNotesTab"),
+      Component: DebitNotesTab,
     },
     {
       value: "suppliers",

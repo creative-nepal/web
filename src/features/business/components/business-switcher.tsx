@@ -9,10 +9,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { useBusinessContext } from "../business-provider";
-import { SECTOR_LABELS } from "../constants";
 
 export function BusinessSwitcher() {
+  const { t } = useTranslation();
   const { businesses, currentBusiness, switchBusiness } = useBusinessContext();
 
   if (!currentBusiness) {
@@ -41,7 +42,7 @@ export function BusinessSwitcher() {
             <span className="flex w-full items-center justify-between gap-2">
               <span className="truncate">{business.legalName}</span>
               <Badge variant="secondary">
-                {SECTOR_LABELS[business.sector] ?? business.sector}
+                {t(`common.sector.${business.sector}`)}
               </Badge>
             </span>
           </DropdownMenuItem>

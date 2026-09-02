@@ -83,3 +83,28 @@ export async function fetchNavigation(
 export async function fetchPublishedPages(): Promise<PublishedPageRef[]> {
   return (await contentFetch<PublishedPageRef[]>("/pages")) ?? [];
 }
+
+export interface PublicPlan {
+  id: string;
+  sector: string;
+  key: string;
+  name: string;
+  priceCents: number;
+  currency: string;
+  billingCycle: string;
+  featureFlags: Record<string, unknown>;
+}
+
+export async function fetchPublicPlans(sector?: string): Promise<PublicPlan[]> {
+  const query = sector ? `?sector=${encodeURIComponent(sector)}` : "";
+
+  const response = await fetch(`${API_URL}/api/v1/public/plans${query}`, {
+    next: { revalidate: REVALIDATE_SECONDS, tags: [CONTENT_CACHE_TAG] },
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  return (await response.json()) as PublicPlan[];
+}

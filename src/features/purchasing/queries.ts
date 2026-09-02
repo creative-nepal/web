@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import {
   getPurchaseOrder,
   listBills,
+  listDebitNotes,
   listPurchaseOrders,
   listSuppliers,
 } from "./services";
@@ -16,6 +17,8 @@ export const purchasingQueryKeys = {
     [...purchasingQueryKeys.all, "order", businessId, poId] as const,
   bills: (businessId: string) =>
     [...purchasingQueryKeys.all, "bills", businessId] as const,
+  debitNotes: (businessId: string) =>
+    [...purchasingQueryKeys.all, "debit-notes", businessId] as const,
 };
 
 export function suppliersQueryOptions(businessId: string) {
@@ -46,6 +49,14 @@ export function billsQueryOptions(businessId: string) {
   return queryOptions({
     queryKey: purchasingQueryKeys.bills(businessId),
     queryFn: () => listBills(businessId),
+    enabled: Boolean(businessId),
+  });
+}
+
+export function debitNotesQueryOptions(businessId: string) {
+  return queryOptions({
+    queryKey: purchasingQueryKeys.debitNotes(businessId),
+    queryFn: () => listDebitNotes(businessId),
     enabled: Boolean(businessId),
   });
 }

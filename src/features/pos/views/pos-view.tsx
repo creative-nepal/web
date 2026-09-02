@@ -40,7 +40,7 @@ export function PosView() {
 
   const submit = useMutation({
     mutationFn: () => {
-      if (!business) throw new Error("No business selected");
+      if (!business) throw new Error(t("ui.web.pos.noBusiness"));
 
       return checkout(business.id, {
         items: cart.lines.map((line) => ({

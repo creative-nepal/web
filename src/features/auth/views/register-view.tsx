@@ -39,7 +39,7 @@ export function RegisterView() {
     setPending(false);
 
     if (signUpError) {
-      setError(signUpError.message ?? "Unable to create account");
+      setError(signUpError.message ?? t("ui.auth.registerFailed"));
       return;
     }
 

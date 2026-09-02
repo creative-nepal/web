@@ -40,8 +40,8 @@ export function ProductsView() {
         title={t("ui.web.products.title")}
         description={
           isMedical
-            ? "Stock is tracked per batch; the figure here is the live, unexpired total."
-            : "Everything this business sells."
+            ? t("ui.web.products.descriptionBatch")
+            : t("ui.web.products.descriptionPlain")
         }
       />
 

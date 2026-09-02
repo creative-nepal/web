@@ -95,7 +95,7 @@ string is hardcoded in a component.**
   client query and the first-render locale. Without that, every client component would paint raw
   keys until the catalogue request resolved.
 - Module-scope data (DataTable column definitions, select options, nav items) cannot call a hook,
-  so those files export factories taking `t` — `planColumns(t)`, `sectorOptions(t)`. Views wrap
+  so those files export factories taking `t` — `planColumns(t)`, `businessColumns(t)`. Views wrap
   them in `useMemo(() => planColumns(t), [t])`.
 - Adding a string means adding the key to `en/ui.json` **and** `ne/ui.json` in `creative-nepal-api`.
 

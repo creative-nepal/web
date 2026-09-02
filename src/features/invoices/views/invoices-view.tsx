@@ -65,7 +65,7 @@ export function InvoicesView() {
     onError: (error) => {
       const message =
         (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ?? "Could not issue credit note";
+          ?.data?.message ?? t("ui.web.invoices.creditNoteFailed");
       toast.error(message);
     },
   });
@@ -113,8 +113,8 @@ export function InvoicesView() {
       <DataSection
         isEmpty={rows.length === 0}
         isLoading={isFetching}
-        emptyTitle="No invoices"
-        emptyDescription="Invoices appear here as sales are completed."
+        emptyTitle={t("ui.web.invoices.emptyTitle")}
+        emptyDescription={t("ui.web.invoices.emptyBody")}
       >
         <InvoiceTable
           invoices={rows}

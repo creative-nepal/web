@@ -40,7 +40,7 @@ export function LoginView() {
     setPending(false);
 
     if (signInError) {
-      setError(signInError.message ?? "Unable to sign in");
+      setError(signInError.message ?? t("ui.auth.signInFailed"));
       return;
     }
 
@@ -58,7 +58,7 @@ export function LoginView() {
 
     if (signInError) {
       setGooglePending(false);
-      setError(signInError.message ?? "Unable to sign in with Google");
+      setError(signInError.message ?? t("ui.auth.googleSignInFailed"));
     }
   }
 
