@@ -32,4 +32,5 @@ export interface ComplianceState {
   doctorName: string;
   patientName: string;
   idNumber: string;
+  prescriptionFileId: string | null;
 }

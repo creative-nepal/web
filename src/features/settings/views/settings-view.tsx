@@ -7,6 +7,7 @@ import {
 } from "@/features/business/business-provider";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { AccountBillingCard } from "../components/account-billing-card";
+import { BrandingCard } from "../components/branding-card";
 import { BusinessDetailsCard } from "../components/business-details-card";
 import { PlanCard } from "../components/plan-card";
 
@@ -27,6 +28,7 @@ export function SettingsView() {
         description={t("ui.web.settings.description")}
       />
       <BusinessDetailsCard business={business} />
+      <BrandingCard business={business} />
       <PlanCard businessId={business.id} />
       <AccountBillingCard businessCount={businesses.length} />
     </div>

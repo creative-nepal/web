@@ -3,16 +3,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
-
-export interface ComplianceState {
-  buyerName: string;
-  buyerPan: string;
-  doctorName: string;
-  patientName: string;
-  idNumber: string;
-}
+import type { ComplianceState } from "../types";
+import { PrescriptionUpload } from "./prescription-upload";
 
 interface ComplianceFieldsProps {
+  businessId: string;
   value: ComplianceState;
   onChange: (patch: Partial<ComplianceState>) => void;
   requiresBuyerPan: boolean;
@@ -21,6 +16,7 @@ interface ComplianceFieldsProps {
 }
 
 export function ComplianceFields({
+  businessId,
   value,
   onChange,
   requiresBuyerPan,
@@ -71,6 +67,13 @@ export function ComplianceFields({
               onChange={(event) => onChange({ idNumber: event.target.value })}
             />
           )}
+          <PrescriptionUpload
+            businessId={businessId}
+            fileId={value.prescriptionFileId}
+            onUploaded={(prescriptionFileId) =>
+              onChange({ prescriptionFileId })
+            }
+          />
         </div>
       )}
     </>

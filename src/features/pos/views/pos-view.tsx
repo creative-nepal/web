@@ -12,16 +12,13 @@ import {
   productsQueryOptions,
 } from "@/features/products/queries";
 import { CartPanel } from "../components/cart-panel";
-import {
-  ComplianceFields,
-  type ComplianceState,
-} from "../components/compliance-fields";
+import { ComplianceFields } from "../components/compliance-fields";
 import { InvoiceReceipt } from "../components/invoice-receipt";
 import { ProductGrid } from "../components/product-grid";
-import { EMPTY_COMPLIANCE, PRESCRIPTION_PLACEHOLDER_URL } from "../constants";
+import { EMPTY_COMPLIANCE } from "../constants";
 import { useCart } from "../hooks/use-cart";
 import { checkout } from "../services";
-import type { CheckoutResult } from "../types";
+import type { CheckoutResult, ComplianceState } from "../types";
 
 export function PosView() {
   const { t } = useTranslation();
@@ -57,7 +54,7 @@ export function PosView() {
           prescription: {
             doctorName: compliance.doctorName,
             patientName: compliance.patientName,
-            attachmentUrl: PRESCRIPTION_PLACEHOLDER_URL,
+            attachmentFileId: compliance.prescriptionFileId ?? undefined,
           },
         }),
         ...(cart.requiresBuyerIdentity && {
@@ -126,6 +123,7 @@ export function PosView() {
           onSubmit={() => submit.mutate()}
         >
           <ComplianceFields
+            businessId={business.id}
             value={compliance}
             onChange={(patch) =>
               setCompliance((current) => ({ ...current, ...patch }))

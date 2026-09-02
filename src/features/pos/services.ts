@@ -7,7 +7,7 @@ export interface CheckoutPayload {
   prescription?: {
     doctorName: string;
     patientName: string;
-    attachmentUrl: string;
+    attachmentFileId?: string;
   };
   buyerIdentity?: { idType: string; idNumber: string };
 }

@@ -10,6 +10,15 @@ export interface Business {
   vatRegistered: boolean;
   cbmsRequired: boolean;
   fiscalYearStartMonth: number;
+  displayName: string | null;
+  theme: {
+    primary?: string;
+    primaryForeground?: string;
+    accent?: string;
+    radius?: string;
+    logoUrl?: string;
+    defaultMode?: "light" | "dark" | "system";
+  };
   status: BusinessStatus;
   createdAt: string;
   updatedAt: string;
