@@ -30,3 +30,13 @@ export async function listProducts(
   );
   return data;
 }
+
+export async function getProduct(
+  businessId: string,
+  productId: string,
+): Promise<Product> {
+  const { data } = await api.get<Product>(
+    `/api/v1/businesses/${businessId}/products/${productId}`,
+  );
+  return data;
+}

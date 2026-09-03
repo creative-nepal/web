@@ -39,3 +39,31 @@ export async function printInvoice(
   );
   return data;
 }
+
+export interface SubstituteProduct {
+  productId: string;
+  name: string;
+  genericName: string;
+  manufacturer: string | null;
+  schedule: string | null;
+  priceCents: number;
+  stockQty: number;
+  earliestExpiry: string | null;
+}
+
+export interface SubstituteResult {
+  productId: string;
+  name: string;
+  genericName: string | null;
+  substitutes: SubstituteProduct[];
+}
+
+export async function listSubstitutes(
+  businessId: string,
+  productId: string,
+): Promise<SubstituteResult> {
+  const { data } = await api.get<SubstituteResult>(
+    `/api/v1/businesses/${businessId}/medical/products/${productId}/substitutes`,
+  );
+  return data;
+}

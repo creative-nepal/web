@@ -11,10 +11,12 @@ import {
   productQueryKeys,
   productsQueryOptions,
 } from "@/features/products/queries";
+import type { Product } from "@/features/products/types";
 import { CartPanel } from "../components/cart-panel";
 import { ComplianceFields } from "../components/compliance-fields";
 import { InvoiceReceipt } from "../components/invoice-receipt";
 import { ProductGrid } from "../components/product-grid";
+import { SubstitutesDialog } from "../components/substitutes-dialog";
 import { EMPTY_COMPLIANCE } from "../constants";
 import { useCart } from "../hooks/use-cart";
 import { checkout } from "../services";
@@ -27,6 +29,7 @@ export function PosView() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [issued, setIssued] = useState<CheckoutResult | null>(null);
+  const [substitutesFor, setSubstitutesFor] = useState<Product | null>(null);
   const [compliance, setCompliance] =
     useState<ComplianceState>(EMPTY_COMPLIANCE);
 
@@ -117,6 +120,9 @@ export function PosView() {
             products={products?.data ?? []}
             isLoading={isFetching}
             onSelect={cart.add}
+            onFindSubstitutes={
+              business.sector === "medical" ? setSubstitutesFor : undefined
+            }
           />
         </div>
 
@@ -144,6 +150,13 @@ export function PosView() {
           />
         </CartPanel>
       </div>
+
+      <SubstitutesDialog
+        businessId={business.id}
+        product={substitutesFor}
+        onOpenChange={(open) => !open && setSubstitutesFor(null)}
+        onPick={cart.add}
+      />
 
       {issued?.invoice && (
         <InvoiceReceipt

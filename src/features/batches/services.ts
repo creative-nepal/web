@@ -42,3 +42,45 @@ export async function listForProduct(
   );
   return data;
 }
+
+export interface RecallDispense {
+  orderId: string;
+  invoiceId: string | null;
+  invoiceNumber: number | null;
+  soldAt: string;
+  quantity: number;
+  customerId: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
+  customerEmail: string | null;
+}
+
+export interface RecallReport {
+  batch: Batch;
+  productName: string;
+  remainingQty: number;
+  dispensedQty: number;
+  dispenses: RecallDispense[];
+}
+
+export async function getRecallReport(
+  businessId: string,
+  batchId: string,
+): Promise<RecallReport> {
+  const { data } = await api.get<RecallReport>(
+    `/api/v1/businesses/${businessId}/medical/batches/${batchId}/recall`,
+  );
+  return data;
+}
+
+export async function quarantineBatch(
+  businessId: string,
+  batchId: string,
+  note?: string,
+): Promise<RecallReport> {
+  const { data } = await api.post<RecallReport>(
+    `/api/v1/businesses/${businessId}/medical/batches/${batchId}/recall`,
+    { ...(note ? { note } : {}) },
+  );
+  return data;
+}

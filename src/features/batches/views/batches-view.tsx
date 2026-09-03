@@ -15,16 +15,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
+import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { formatCurrency } from "@/lib/formatters";
+import { RecallDialog } from "../components/recall-dialog";
 import { EXPIRY_WARNING_DAYS, EXPIRY_WINDOWS } from "../constants";
 import { expiringBatchesQueryOptions } from "../queries";
+import type { Batch } from "../services";
 
 export function BatchesView() {
   const { t } = useTranslation();
 
   const business = useCurrentBusiness();
   const [withinDays, setWithinDays] = useState(90);
+  const [recalling, setRecalling] = useState<Batch | null>(null);
   const { data, isFetching } = useQuery(
     expiringBatchesQueryOptions(business?.id ?? "", withinDays),
   );
@@ -70,6 +74,7 @@ export function BatchesView() {
               <TableHead className="text-right">
                 {t("ui.web.batches.cost")}
               </TableHead>
+              <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,11 +103,28 @@ export function BatchesView() {
                 <TableCell className="text-right tabular-nums">
                   {formatCurrency(batch.costPriceCents / 100, "NPR")}
                 </TableCell>
+                <TableCell className="text-right">
+                  <Can permission={{ recall: ["view"] }}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setRecalling(batch)}
+                    >
+                      {t("ui.web.batches.recall")}
+                    </Button>
+                  </Can>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
+
+      <RecallDialog
+        businessId={business.id}
+        batch={recalling}
+        onOpenChange={(open) => !open && setRecalling(null)}
+      />
     </div>
   );
 }
