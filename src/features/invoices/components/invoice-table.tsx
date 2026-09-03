@@ -38,6 +38,9 @@ export function InvoiceTable({
           <TableHead>{t("ui.field.buyer")}</TableHead>
           <TableHead>{t("ui.field.status")}</TableHead>
           <TableHead className="text-right">
+            {t("ui.web.pos.discount")}
+          </TableHead>
+          <TableHead className="text-right">
             {t("common.invoice.vat")}
           </TableHead>
           <TableHead className="text-right">{t("ui.field.total")}</TableHead>
@@ -65,6 +68,11 @@ export function InvoiceTable({
                 variants={INVOICE_STATUS_VARIANTS}
                 labels={INVOICE_STATUS_LABELS}
               />
+            </TableCell>
+            <TableCell className="text-right tabular-nums">
+              {invoice.discountCents > 0
+                ? `- ${money(invoice.discountCents)}`
+                : "—"}
             </TableCell>
             <TableCell className="text-right tabular-nums">
               {money(invoice.vatCents)}

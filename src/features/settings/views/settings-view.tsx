@@ -5,8 +5,10 @@ import {
   useBusinessContext,
   useCurrentBusiness,
 } from "@/features/business/business-provider";
+import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { AccountBillingCard } from "../components/account-billing-card";
+import { BillingRulesCard } from "../components/billing-rules-card";
 import { BrandingCard } from "../components/branding-card";
 import { BusinessDetailsCard } from "../components/business-details-card";
 import { PlanCard } from "../components/plan-card";
@@ -28,6 +30,10 @@ export function SettingsView() {
         description={t("ui.web.settings.description")}
       />
       <BusinessDetailsCard business={business} />
+
+      <Can permission={{ business: ["manage"] }}>
+        <BillingRulesCard business={business} />
+      </Can>
       <BrandingCard business={business} />
       <PlanCard businessId={business.id} />
       <AccountBillingCard businessCount={businesses.length} />

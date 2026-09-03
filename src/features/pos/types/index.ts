@@ -11,6 +11,7 @@ export interface CheckoutInvoice {
   fiscalYear: string;
   issuedAtBs: string;
   subtotalCents: number;
+  discountCents: number;
   serviceChargeCents: number;
   vatCents: number;
   totalCents: number;
@@ -21,6 +22,8 @@ export interface CheckoutResult {
   id: string;
   status: string;
   subtotalCents: number;
+  discountCents: number;
+  serviceChargeCents: number;
   taxCents: number;
   totalCents: number;
   invoice: CheckoutInvoice | null;

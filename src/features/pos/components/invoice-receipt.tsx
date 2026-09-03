@@ -50,6 +50,14 @@ export function InvoiceReceipt({
             <dt className="text-muted-foreground">{t("ui.field.subtotal")}</dt>
             <dd className="tabular-nums">{money(invoice.subtotalCents)}</dd>
           </div>
+          {invoice.discountCents > 0 && (
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">
+                {t("ui.web.pos.discount")}
+              </dt>
+              <dd className="tabular-nums">- {money(invoice.discountCents)}</dd>
+            </div>
+          )}
           {invoice.serviceChargeCents > 0 && (
             <div className="flex justify-between">
               <dt className="text-muted-foreground">

@@ -6,8 +6,13 @@ import type { CartLine } from "../types";
 
 export const BUYER_PAN_REQUIRED_ABOVE_CENTS = 1_000_000;
 
-export function useCart(vatRegistered: boolean, serviceChargePercent = 0) {
+export function useCart(
+  vatRegistered: boolean,
+  serviceChargePercent = 0,
+  maxDiscountPercent = 0,
+) {
   const [lines, setLines] = useState<CartLine[]>([]);
+  const [discountPercent, setDiscountPercent] = useState(0);
 
   const add = useCallback((product: Product) => {
     setLines((current) => {
@@ -35,27 +40,33 @@ export function useCart(vatRegistered: boolean, serviceChargePercent = 0) {
     );
   }, []);
 
-  const clear = useCallback(() => setLines([]), []);
+  const clear = useCallback(() => {
+    setLines([]);
+    setDiscountPercent(0);
+  }, []);
 
   const totals = useMemo(() => {
     const subtotalCents = lines.reduce(
       (total, line) => total + line.product.priceCents * line.quantity,
       0,
     );
+    const discountCents = Math.round((subtotalCents * discountPercent) / 100);
+    const netCents = subtotalCents - discountCents;
     const serviceChargeCents = Math.round(
-      (subtotalCents * serviceChargePercent) / 100,
+      (netCents * serviceChargePercent) / 100,
     );
     const vatCents = vatRegistered
-      ? Math.round(((subtotalCents + serviceChargeCents) * 13) / 100)
+      ? Math.round(((netCents + serviceChargeCents) * 13) / 100)
       : 0;
 
     return {
       subtotalCents,
+      discountCents,
       serviceChargeCents,
       vatCents,
-      totalCents: subtotalCents + serviceChargeCents + vatCents,
+      totalCents: netCents + serviceChargeCents + vatCents,
     };
-  }, [lines, vatRegistered, serviceChargePercent]);
+  }, [lines, vatRegistered, serviceChargePercent, discountPercent]);
 
   const schedules = useMemo(
     () => new Set(lines.map((line) => line.product.sectorData?.schedule)),
@@ -68,6 +79,18 @@ export function useCart(vatRegistered: boolean, serviceChargePercent = 0) {
     setQuantity,
     clear,
     totals,
+    discountPercent,
+    setDiscountPercent: useCallback(
+      (next: number) =>
+        setDiscountPercent(
+          Math.min(
+            Math.max(Number.isFinite(next) ? next : 0, 0),
+            maxDiscountPercent,
+          ),
+        ),
+      [maxDiscountPercent],
+    ),
+    maxDiscountPercent,
     requiresBuyerPan:
       vatRegistered && totals.totalCents > BUYER_PAN_REQUIRED_ABOVE_CENTS,
     requiresPrescription:

@@ -30,7 +30,11 @@ export function PosView() {
   const [compliance, setCompliance] =
     useState<ComplianceState>(EMPTY_COMPLIANCE);
 
-  const cart = useCart(business?.vatRegistered ?? false);
+  const cart = useCart(
+    business?.vatRegistered ?? false,
+    business?.serviceChargePercent ?? 0,
+    business?.maxDiscountPercent ?? 0,
+  );
   const { data: products, isFetching } = useQuery(
     productsQueryOptions(business?.id ?? "", search),
   );
@@ -44,6 +48,9 @@ export function PosView() {
           productId: line.product.id,
           quantity: line.quantity,
         })),
+        ...(cart.discountPercent > 0 && {
+          discountPercent: cart.discountPercent,
+        }),
         ...(compliance.buyerName && {
           customer: {
             name: compliance.buyerName,
@@ -74,7 +81,7 @@ export function PosView() {
     onError: (error) => {
       const message =
         (error as { response?: { data?: { message?: string | string[] } } })
-          ?.response?.data?.message ?? "Checkout failed";
+          ?.response?.data?.message ?? t("ui.web.pos.checkoutFailed");
       toast.error(Array.isArray(message) ? message.join(", ") : message);
     },
   });
@@ -117,6 +124,9 @@ export function PosView() {
           lines={cart.lines}
           totals={cart.totals}
           vatRegistered={business.vatRegistered}
+          discountPercent={cart.discountPercent}
+          maxDiscountPercent={cart.maxDiscountPercent}
+          onDiscountPercentChange={cart.setDiscountPercent}
           onQuantityChange={cart.setQuantity}
           canSubmit={canSubmit}
           isSubmitting={submit.isPending}

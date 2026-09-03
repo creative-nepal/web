@@ -7,6 +7,7 @@ export interface Invoice {
   customerName: string | null;
   customerPan: string | null;
   subtotalCents: number;
+  discountCents: number;
   serviceChargeCents: number;
   vatCents: number;
   totalCents: number;

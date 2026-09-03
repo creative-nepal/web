@@ -9,6 +9,8 @@ export interface Business {
   panNumber: string | null;
   vatRegistered: boolean;
   cbmsRequired: boolean;
+  serviceChargePercent: number;
+  maxDiscountPercent: number;
   fiscalYearStartMonth: number;
   displayName: string | null;
   theme: {

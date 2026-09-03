@@ -2,7 +2,13 @@ import { api } from "@/lib/api";
 import type { CheckoutResult } from "./types";
 
 export interface CheckoutPayload {
-  items: Array<{ productId: string; quantity: number }>;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    discountCents?: number;
+  }>;
+  discountPercent?: number;
+  discountReason?: string;
   customer?: { name: string; phone?: string; panNumber?: string };
   prescription?: {
     doctorName: string;

@@ -5,7 +5,9 @@ import { SummaryList } from "@/components/summary-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { money } from "@/lib/money";
 import type { CartLine } from "../types";
@@ -14,11 +16,15 @@ interface CartPanelProps {
   lines: CartLine[];
   totals: {
     subtotalCents: number;
+    discountCents: number;
     serviceChargeCents: number;
     vatCents: number;
     totalCents: number;
   };
   vatRegistered: boolean;
+  discountPercent: number;
+  maxDiscountPercent: number;
+  onDiscountPercentChange: (percent: number) => void;
   onQuantityChange: (productId: string, quantity: number) => void;
   canSubmit: boolean;
   isSubmitting: boolean;
@@ -30,6 +36,9 @@ export function CartPanel({
   lines,
   totals,
   vatRegistered,
+  discountPercent,
+  maxDiscountPercent,
+  onDiscountPercentChange,
   onQuantityChange,
   canSubmit,
   isSubmitting,
@@ -75,12 +84,53 @@ export function CartPanel({
 
         <Separator />
 
+        {maxDiscountPercent > 0 && lines.length > 0 && (
+          <Can permission={{ order: ["discount"] }}>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="pos-discount">
+                {t("ui.web.pos.discountPercent")}
+              </Label>
+              <Input
+                id="pos-discount"
+                type="number"
+                min={0}
+                max={maxDiscountPercent}
+                step={0.5}
+                value={discountPercent}
+                onChange={(event) =>
+                  onDiscountPercentChange(Number(event.target.value))
+                }
+                className="h-8"
+              />
+              <p className="text-muted-foreground text-xs">
+                {t("ui.web.pos.discountHint", { max: maxDiscountPercent })}
+              </p>
+            </div>
+          </Can>
+        )}
+
         <SummaryList
           rows={[
             {
               label: t("common.invoice.subtotal"),
               value: money(totals.subtotalCents),
             },
+            ...(totals.discountCents > 0
+              ? [
+                  {
+                    label: t("ui.web.pos.discount"),
+                    value: `- ${money(totals.discountCents)}`,
+                  },
+                ]
+              : []),
+            ...(totals.serviceChargeCents > 0
+              ? [
+                  {
+                    label: t("ui.web.pos.serviceCharge"),
+                    value: money(totals.serviceChargeCents),
+                  },
+                ]
+              : []),
             ...(vatRegistered
               ? [
                   {
@@ -100,7 +150,9 @@ export function CartPanel({
         {children}
 
         <Button size="lg" disabled={!canSubmit} onClick={onSubmit}>
-          {isSubmitting ? "Processing..." : "Complete sale"}
+          {isSubmitting
+            ? t("ui.web.pos.processing")
+            : t("ui.web.pos.completeSale")}
         </Button>
       </CardContent>
     </Card>
