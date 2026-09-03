@@ -6,6 +6,11 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/composed/page-header";
 import { SearchInput } from "@/components/composed/search-input";
 import { useCurrentBusiness } from "@/features/business/business-provider";
+import {
+  cashQueryKeys,
+  currentSessionQueryOptions,
+} from "@/features/cash/queries";
+import type { PaymentMethod } from "@/features/cash/types";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import {
   productQueryKeys,
@@ -15,6 +20,7 @@ import type { Product } from "@/features/products/types";
 import { CartPanel } from "../components/cart-panel";
 import { ComplianceFields } from "../components/compliance-fields";
 import { InvoiceReceipt } from "../components/invoice-receipt";
+import { PaymentPanel } from "../components/payment-panel";
 import { ProductGrid } from "../components/product-grid";
 import { SubstitutesDialog } from "../components/substitutes-dialog";
 import { EMPTY_COMPLIANCE } from "../constants";
@@ -30,6 +36,8 @@ export function PosView() {
   const [search, setSearch] = useState("");
   const [issued, setIssued] = useState<CheckoutResult | null>(null);
   const [substitutesFor, setSubstitutesFor] = useState<Product | null>(null);
+  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [reference, setReference] = useState("");
   const [compliance, setCompliance] =
     useState<ComplianceState>(EMPTY_COMPLIANCE);
 
@@ -37,6 +45,9 @@ export function PosView() {
     business?.vatRegistered ?? false,
     business?.serviceChargePercent ?? 0,
     business?.maxDiscountPercent ?? 0,
+  );
+  const { data: till } = useQuery(
+    currentSessionQueryOptions(business?.id ?? ""),
   );
   const { data: products, isFetching } = useQuery(
     productsQueryOptions(business?.id ?? "", search),
@@ -53,6 +64,15 @@ export function PosView() {
         })),
         ...(cart.discountPercent > 0 && {
           discountPercent: cart.discountPercent,
+        }),
+        ...(method && {
+          payments: [
+            {
+              method,
+              amountCents: cart.totals.totalCents,
+              ...(reference ? { reference } : {}),
+            },
+          ],
         }),
         ...(compliance.buyerName && {
           customer: {
@@ -78,7 +98,10 @@ export function PosView() {
     onSuccess: (result) => {
       setIssued(result);
       cart.clear();
+      setMethod(null);
+      setReference("");
       setCompliance(EMPTY_COMPLIANCE);
+      void queryClient.invalidateQueries({ queryKey: cashQueryKeys.all });
       void queryClient.invalidateQueries({ queryKey: productQueryKeys.all });
     },
     onError: (error) => {
@@ -138,6 +161,15 @@ export function PosView() {
           isSubmitting={submit.isPending}
           onSubmit={() => submit.mutate()}
         >
+          <PaymentPanel
+            totalCents={cart.totals.totalCents}
+            method={method}
+            onMethodChange={setMethod}
+            reference={reference}
+            onReferenceChange={setReference}
+            tillOpen={Boolean(till)}
+          />
+
           <ComplianceFields
             businessId={business.id}
             value={compliance}

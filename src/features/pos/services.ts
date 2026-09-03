@@ -9,6 +9,11 @@ export interface CheckoutPayload {
   }>;
   discountPercent?: number;
   discountReason?: string;
+  payments?: Array<{
+    method: string;
+    amountCents: number;
+    reference?: string;
+  }>;
   customer?: { name: string; phone?: string; panNumber?: string };
   prescription?: {
     doctorName: string;
