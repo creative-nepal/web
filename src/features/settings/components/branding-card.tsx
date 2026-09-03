@@ -92,7 +92,6 @@ export function BrandingCard({ business }: { business: Business }) {
           <Label>{t("ui.web.settings.logo")}</Label>
           <FileUpload
             label={t("ui.web.settings.uploadLogo")}
-            replaceLabel={t("ui.web.settings.replaceLogo")}
             clearLabel={t("ui.action.cancel")}
             accept="image/jpeg,image/png,image/webp,image/svg+xml"
             value={logo}
