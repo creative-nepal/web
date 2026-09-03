@@ -15,7 +15,12 @@ export async function listCustomers(
 
 export async function createCustomer(
   businessId: string,
-  input: { name: string; phone?: string; creditLimitCents?: number },
+  input: {
+    name: string;
+    phone?: string;
+    email?: string;
+    creditLimitCents?: number;
+  },
 ): Promise<Customer> {
   const { data } = await api.post<Customer>(
     `/api/v1/businesses/${businessId}/customers`,

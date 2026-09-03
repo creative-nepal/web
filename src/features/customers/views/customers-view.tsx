@@ -144,6 +144,7 @@ export function CustomersView() {
   const [viewing, setViewing] = useState<Customer | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [limit, setLimit] = useState("");
 
   const { data, isFetching } = useQuery(
@@ -155,12 +156,14 @@ export function CustomersView() {
       createCustomer(business?.id ?? "", {
         name: name.trim(),
         phone: phone.trim() || undefined,
+        email: email.trim() || undefined,
         creditLimitCents: limit ? Math.round(Number(limit) * 100) : undefined,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: customerQueryKeys.all });
       setName("");
       setPhone("");
+      setEmail("");
       setLimit("");
       toast.success(t("ui.web.customers.customerAdded"));
     },
@@ -208,6 +211,13 @@ export function CustomersView() {
             className="max-w-40"
           />
           <Input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder={t("ui.field.email")}
+            className="max-w-52"
+          />
+          <Input
             type="number"
             value={limit}
             onChange={(event) => setLimit(event.target.value)}
@@ -247,6 +257,7 @@ export function CustomersView() {
             <TableRow>
               <TableHead>{t("ui.field.name")}</TableHead>
               <TableHead>{t("ui.field.phone")}</TableHead>
+              <TableHead>{t("ui.field.email")}</TableHead>
               <TableHead className="text-right">
                 {t("ui.web.customers.creditLimit")}
               </TableHead>
@@ -261,6 +272,9 @@ export function CustomersView() {
               <TableRow key={customer.id}>
                 <TableCell className="font-medium">{customer.name}</TableCell>
                 <TableCell>{customer.phone ?? "—"}</TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {customer.email ?? "—"}
+                </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {money(customer.creditLimitCents)}
                 </TableCell>
