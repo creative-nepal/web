@@ -3,13 +3,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import { isPacked, unitLabel } from "@/features/products/pack-pricing";
 import type { Product } from "@/features/products/types";
 import { money } from "@/lib/money";
 
 interface ProductGridProps {
   products: Product[];
   isLoading: boolean;
-  onSelect: (product: Product) => void;
+  onSelect: (product: Product, units?: number) => void;
   onFindSubstitutes?: (product: Product) => void;
 }
 
@@ -59,10 +60,27 @@ export function ProductGrid({
                       : "text-muted-foreground"
                   }
                 >
-                  {product.stockQty} {product.unitType}
+                  {isPacked(product)
+                    ? t("ui.web.products.packStock", {
+                        packs: product.stockPacks,
+                        unit: product.unitType,
+                        loose: `${product.stockLooseUnits} ${unitLabel(product)}`,
+                      })
+                    : `${product.stockQty} ${product.unitType}`}
                 </span>
               </div>
             </button>
+            {isPacked(product) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="justify-start border-t text-xs"
+                disabled={product.stockQty <= 0}
+                onClick={() => onSelect(product, 1)}
+              >
+                + 1 {unitLabel(product)} · {money(product.subUnitPriceCents)}
+              </Button>
+            )}
             {onFindSubstitutes && (
               <Button
                 variant="ghost"

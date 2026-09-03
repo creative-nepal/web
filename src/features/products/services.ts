@@ -40,3 +40,15 @@ export async function getProduct(
   );
   return data;
 }
+
+export async function updateProductPacking(
+  businessId: string,
+  productId: string,
+  input: { unitsPerPack: number; subUnitLabel?: string },
+): Promise<Product> {
+  const { data } = await api.patch<Product>(
+    `/api/v1/businesses/${businessId}/products/${productId}`,
+    input,
+  );
+  return data;
+}

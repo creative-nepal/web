@@ -4,8 +4,13 @@ export interface Product {
   name: string;
   sku: string | null;
   unitType: string;
+  unitsPerPack: number;
+  subUnitLabel: string | null;
+  subUnitPriceCents: number;
   priceCents: number;
   stockQty: number;
+  stockPacks: number;
+  stockLooseUnits: number;
   lowStockThreshold: number;
   isLowStock: boolean;
   isActive: boolean;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { lineTotalCents } from "@/features/products/pack-pricing";
 import type { Product } from "@/features/products/types";
 import type { CartLine } from "../types";
 
@@ -14,19 +15,21 @@ export function useCart(
   const [lines, setLines] = useState<CartLine[]>([]);
   const [discountPercent, setDiscountPercent] = useState(0);
 
-  const add = useCallback((product: Product) => {
+  const add = useCallback((product: Product, units?: number) => {
+    const step = units ?? (product.unitsPerPack > 1 ? product.unitsPerPack : 1);
+
     setLines((current) => {
       const existing = current.find((line) => line.product.id === product.id);
 
       if (existing) {
         return current.map((line) =>
           line.product.id === product.id
-            ? { ...line, quantity: line.quantity + 1 }
+            ? { ...line, quantity: line.quantity + step }
             : line,
         );
       }
 
-      return [...current, { product, quantity: 1 }];
+      return [...current, { product, quantity: step }];
     });
   }, []);
 
@@ -47,7 +50,7 @@ export function useCart(
 
   const totals = useMemo(() => {
     const subtotalCents = lines.reduce(
-      (total, line) => total + line.product.priceCents * line.quantity,
+      (total, line) => total + lineTotalCents(line.product, line.quantity),
       0,
     );
     const discountCents = Math.round((subtotalCents * discountPercent) / 100);

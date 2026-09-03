@@ -9,6 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import {
+  isPacked,
+  lineTotalCents,
+  unitLabel,
+} from "@/features/products/pack-pricing";
 import { money } from "@/lib/money";
 import type { CartLine } from "../types";
 
@@ -61,7 +66,15 @@ export function CartPanel({
                 key={line.product.id}
                 className="flex items-center gap-2 text-sm"
               >
-                <span className="flex-1 truncate">{line.product.name}</span>
+                <span className="flex flex-1 flex-col truncate">
+                  <span className="truncate">{line.product.name}</span>
+                  {isPacked(line.product) && (
+                    <span className="text-muted-foreground text-xs">
+                      {unitLabel(line.product)} ·{" "}
+                      {money(line.product.subUnitPriceCents)}
+                    </span>
+                  )}
+                </span>
                 <Input
                   type="number"
                   min={0}
@@ -75,7 +88,7 @@ export function CartPanel({
                   className="h-8 w-16"
                 />
                 <span className="w-20 text-right tabular-nums">
-                  {money(line.product.priceCents * line.quantity)}
+                  {money(lineTotalCents(line.product, line.quantity))}
                 </span>
               </div>
             ))}

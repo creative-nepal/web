@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/composed/empty-state";
 import { PageHeader } from "@/components/composed/page-header";
 import { SearchInput } from "@/components/composed/search-input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -15,15 +16,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
+import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { formatCurrency } from "@/lib/formatters";
+import { PackingDialog } from "../components/packing-dialog";
+import { isPacked, unitLabel } from "../pack-pricing";
 import { productsQueryOptions } from "../queries";
+import type { Product } from "../types";
 
 export function ProductsView() {
   const { t } = useTranslation();
 
   const business = useCurrentBusiness();
   const [search, setSearch] = useState("");
+  const [packing, setPacking] = useState<Product | null>(null);
   const { data, isFetching } = useQuery(
     productsQueryOptions(business?.id ?? "", search),
   );
@@ -70,6 +76,7 @@ export function ProductsView() {
               <TableHead className="text-right">
                 {t("ui.field.stock")}
               </TableHead>
+              <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -99,13 +106,36 @@ export function ProductsView() {
                     product.isLowStock ? "text-destructive" : ""
                   }`}
                 >
-                  {product.stockQty} {product.unitType}
+                  {isPacked(product)
+                    ? t("ui.web.products.packStock", {
+                        packs: product.stockPacks,
+                        unit: product.unitType,
+                        loose: `${product.stockLooseUnits} ${unitLabel(product)}`,
+                      })
+                    : `${product.stockQty} ${product.unitType}`}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Can permission={{ product: ["update"] }}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setPacking(product)}
+                    >
+                      {t("ui.web.products.unitsPerPack")}
+                    </Button>
+                  </Can>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
+
+      <PackingDialog
+        businessId={business.id}
+        product={packing}
+        onOpenChange={(open) => !open && setPacking(null)}
+      />
     </div>
   );
 }
