@@ -1,0 +1,49 @@
+import { api } from "@/lib/api";
+import type { PaginatedResult } from "@/types/api";
+import type { Customer, LedgerEntry } from "./types";
+
+export async function listCustomers(
+  businessId: string,
+  params: { search?: string; owing?: string } = {},
+): Promise<PaginatedResult<Customer>> {
+  const { data } = await api.get<PaginatedResult<Customer>>(
+    `/api/v1/businesses/${businessId}/customers`,
+    { params: { limit: 50, ...params } },
+  );
+  return data;
+}
+
+export async function createCustomer(
+  businessId: string,
+  input: { name: string; phone?: string; creditLimitCents?: number },
+): Promise<Customer> {
+  const { data } = await api.post<Customer>(
+    `/api/v1/businesses/${businessId}/customers`,
+    input,
+  );
+  return data;
+}
+
+export async function getLedger(
+  businessId: string,
+  customerId: string,
+): Promise<PaginatedResult<LedgerEntry>> {
+  const { data } = await api.get<PaginatedResult<LedgerEntry>>(
+    `/api/v1/businesses/${businessId}/customers/${customerId}/ledger`,
+    { params: { limit: 50 } },
+  );
+  return data;
+}
+
+export async function recordPayment(
+  businessId: string,
+  customerId: string,
+  amountCents: number,
+  note?: string,
+): Promise<LedgerEntry> {
+  const { data } = await api.post<LedgerEntry>(
+    `/api/v1/businesses/${businessId}/customers/${customerId}/payments`,
+    { amountCents, note },
+  );
+  return data;
+}

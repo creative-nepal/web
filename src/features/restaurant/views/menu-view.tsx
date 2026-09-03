@@ -17,8 +17,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
+import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { formatCurrency } from "@/lib/formatters";
+import { RecipeDialog } from "../components/recipe-dialog";
 import { menuQueryOptions, restaurantQueryKeys } from "../queries";
 import { createMenuItem, setAvailability } from "../services";
 
@@ -31,6 +33,10 @@ export function MenuView() {
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [station, setStation] = useState("main");
+  const [recipeFor, setRecipeFor] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const { data: items } = useQuery(menuQueryOptions(business?.id ?? ""));
   const invalidate = () =>
@@ -69,6 +75,15 @@ export function MenuView() {
 
   return (
     <div className="flex flex-col gap-6">
+      {recipeFor && (
+        <RecipeDialog
+          businessId={business.id}
+          menuItemId={recipeFor.id}
+          menuItemName={recipeFor.name}
+          onClose={() => setRecipeFor(null)}
+        />
+      )}
+
       <PageHeader
         title={t("ui.web.restaurant.menuTitle")}
         description={t("ui.web.restaurant.menuDescription")}
@@ -118,6 +133,7 @@ export function MenuView() {
             <TableHead className="text-right">
               {t("ui.web.restaurant.available")}
             </TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -138,6 +154,19 @@ export function MenuView() {
                     toggle.mutate({ id: item.id, isAvailable: checked })
                   }
                 />
+              </TableCell>
+              <TableCell className="text-right">
+                <Can permission={{ product: ["update"] }}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      setRecipeFor({ id: item.id, name: item.name })
+                    }
+                  >
+                    {t("ui.web.menu.recipeTitle")}
+                  </Button>
+                </Can>
               </TableCell>
             </TableRow>
           ))}

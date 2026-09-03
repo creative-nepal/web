@@ -83,6 +83,35 @@ export async function createMenuItem(
   return data;
 }
 
+export interface RecipeLine {
+  productId: string;
+  productName: string;
+  quantity: string;
+  unitType: string;
+}
+
+export async function getRecipe(
+  businessId: string,
+  menuItemId: string,
+): Promise<RecipeLine[]> {
+  const { data } = await api.get<RecipeLine[]>(
+    `/api/v1/businesses/${businessId}/menu/${menuItemId}/recipe`,
+  );
+  return data;
+}
+
+export async function setRecipe(
+  businessId: string,
+  menuItemId: string,
+  lines: Array<{ productId: string; quantity: number }>,
+): Promise<RecipeLine[]> {
+  const { data } = await api.put<RecipeLine[]>(
+    `/api/v1/businesses/${businessId}/menu/${menuItemId}/recipe`,
+    { lines },
+  );
+  return data;
+}
+
 export async function setAvailability(
   businessId: string,
   menuItemId: string,

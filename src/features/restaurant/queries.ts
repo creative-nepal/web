@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { KITCHEN_POLL_INTERVAL_MS } from "./constants";
-import { listMenu, listTables, listTickets } from "./services";
+import { getRecipe, listMenu, listTables, listTickets } from "./services";
 
 export const restaurantQueryKeys = {
   all: ["restaurant"] as const,
@@ -10,6 +10,8 @@ export const restaurantQueryKeys = {
     [...restaurantQueryKeys.all, "menu", businessId] as const,
   tickets: (businessId: string, openOnly: boolean) =>
     [...restaurantQueryKeys.all, "tickets", businessId, openOnly] as const,
+  recipe: (businessId: string, menuItemId: string) =>
+    [...restaurantQueryKeys.all, "recipe", businessId, menuItemId] as const,
 };
 
 export function tablesQueryOptions(businessId: string) {
@@ -34,5 +36,13 @@ export function ticketsQueryOptions(businessId: string, openOnly = true) {
     queryFn: () => listTickets(businessId, { openOnly }),
     enabled: Boolean(businessId),
     refetchInterval: KITCHEN_POLL_INTERVAL_MS,
+  });
+}
+
+export function recipeQueryOptions(businessId: string, menuItemId: string) {
+  return queryOptions({
+    queryKey: restaurantQueryKeys.recipe(businessId, menuItemId),
+    queryFn: () => getRecipe(businessId, menuItemId),
+    enabled: Boolean(businessId && menuItemId),
   });
 }
