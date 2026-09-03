@@ -11,6 +11,7 @@ import {
   currentSessionQueryOptions,
 } from "@/features/cash/queries";
 import type { PaymentMethod } from "@/features/cash/types";
+import { channelsQueryOptions } from "@/features/channels/queries";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import {
   productQueryKeys,
@@ -18,6 +19,7 @@ import {
 } from "@/features/products/queries";
 import type { Product } from "@/features/products/types";
 import { CartPanel } from "../components/cart-panel";
+import { ChannelPicker } from "../components/channel-picker";
 import { ComplianceFields } from "../components/compliance-fields";
 import { InvoiceReceipt } from "../components/invoice-receipt";
 import { PaymentPanel } from "../components/payment-panel";
@@ -37,6 +39,7 @@ export function PosView() {
   const [issued, setIssued] = useState<CheckoutResult | null>(null);
   const [substitutesFor, setSubstitutesFor] = useState<Product | null>(null);
   const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [channelId, setChannelId] = useState<string | null>(null);
   const [reference, setReference] = useState("");
   const [compliance, setCompliance] =
     useState<ComplianceState>(EMPTY_COMPLIANCE);
@@ -48,6 +51,11 @@ export function PosView() {
   );
   const { data: till } = useQuery(
     currentSessionQueryOptions(business?.id ?? ""),
+  );
+  const { data: channels } = useQuery(
+    channelsQueryOptions(
+      business?.sector === "restaurant" ? (business?.id ?? "") : "",
+    ),
   );
   const { data: products, isFetching } = useQuery(
     productsQueryOptions(business?.id ?? "", search),
@@ -65,6 +73,7 @@ export function PosView() {
         ...(cart.discountPercent > 0 && {
           discountPercent: cart.discountPercent,
         }),
+        ...(channelId && { channelId, source: "delivery" as const }),
         ...(method && {
           payments: [
             {
@@ -98,6 +107,7 @@ export function PosView() {
     onSuccess: (result) => {
       setIssued(result);
       cart.clear();
+      setChannelId(null);
       setMethod(null);
       setReference("");
       setCompliance(EMPTY_COMPLIANCE);
@@ -161,6 +171,14 @@ export function PosView() {
           isSubmitting={submit.isPending}
           onSubmit={() => submit.mutate()}
         >
+          <ChannelPicker
+            channels={(channels?.data ?? []).filter(
+              (channel) => channel.isActive,
+            )}
+            value={channelId}
+            onChange={setChannelId}
+          />
+
           <PaymentPanel
             totalCents={cart.totals.totalCents}
             method={method}

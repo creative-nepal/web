@@ -9,6 +9,8 @@ export interface CheckoutPayload {
   }>;
   discountPercent?: number;
   discountReason?: string;
+  channelId?: string;
+  source?: string;
   payments?: Array<{
     method: string;
     amountCents: number;
