@@ -23,16 +23,11 @@ interface UploadedFile {
   id: string;
   url: string;
   name?: string;
-  /** Lets the preview play a video rather than showing a file icon. */
+
   contentType?: string;
 }
 
 interface FileUploadProps {
-  /**
-   * Performs the upload and resolves the stored file. Transport differs per
-   * app — business-scoped in the workspace, platform-scoped in admin — so it
-   * is injected rather than assumed here.
-   */
   onUpload: (file: File) => Promise<UploadedFile>;
   value?: UploadedFile | null;
   onChange?: (value: UploadedFile | null) => void;
@@ -40,7 +35,7 @@ interface FileUploadProps {
   label: string;
   clearLabel: string;
   hint?: string;
-  /** Render the stored file as a thumbnail rather than a file icon. */
+
   image?: boolean;
   disabled?: boolean;
 }

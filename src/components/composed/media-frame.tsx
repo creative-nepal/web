@@ -7,10 +7,6 @@ interface MediaFrameProps extends React.ComponentProps<"img"> {
   containerClassName?: string;
 }
 
-/**
- * `AspectRatio` around an `<img>`, defaulting to 16:9. For non-image content (embeds, video
- * players, skeletons), compose `AspectRatio` directly instead.
- */
 function MediaFrame({
   ratio = 16 / 9,
   containerClassName,

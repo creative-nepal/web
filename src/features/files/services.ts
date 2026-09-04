@@ -35,10 +35,6 @@ async function complete(
   return data;
 }
 
-/**
- * Three steps, and the bytes never touch the API: it signs, the browser PUTs
- * straight to object storage, then the server confirms what actually landed.
- */
 export async function uploadFile(
   businessId: string,
   file: File,
@@ -75,11 +71,6 @@ export async function getDownloadUrl(
   return url;
 }
 
-/**
- * Prefer this where the URL will be stored — a CMS block, a theme logo. A
- * public file's URL is permanent; a private one expires and must be fetched
- * again each time it is shown.
- */
 export async function getDownloadTarget(
   businessId: string,
   fileId: string,

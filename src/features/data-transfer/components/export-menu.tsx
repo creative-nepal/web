@@ -21,7 +21,7 @@ export function ExportMenu({
 }: {
   businessId: string;
   resource: string;
-  /** Needed only where two exports sit together and must be told apart. */
+
   label?: string;
 }) {
   const { t } = useTranslation();

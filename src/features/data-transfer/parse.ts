@@ -2,7 +2,6 @@ import ExcelJS from "exceljs";
 
 export type SheetRow = Record<string, string>;
 
-/** Header → the field name the API expects. */
 export type ColumnMap = Record<string, string>;
 
 function normaliseHeader(header: string): string {
@@ -59,7 +58,6 @@ function toRows(headers: string[], lines: string[][]): SheetRow[] {
 }
 
 async function parseCsv(file: File): Promise<SheetRow[]> {
-  // Excel writes a BOM; leaving it turns the first header into "﻿Name".
   const text = (await file.text()).replace(/^﻿/, "");
   const lines = text
     .split(/\r?\n/)
@@ -93,8 +91,6 @@ async function parseXlsx(file: File): Promise<SheetRow[]> {
     grid.push(cells);
   });
 
-  // Our own exports carry a title and a subtitle before the headers, so the
-  // header row is whichever line first looks like one rather than line 1.
   const headerIndex = grid.findIndex(
     (cells) => cells.filter((cell) => cell !== "").length > 1,
   );

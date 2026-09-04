@@ -42,7 +42,7 @@ export function ImportDialog<TRow>({
   resource: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Maps one spreadsheet row to the API's shape, or null to drop it. */
+
   toRow: (row: SheetRow, rowNumber: number) => TRow | null;
   note?: string;
   onDone?: () => void;
@@ -68,8 +68,7 @@ export function ImportDialog<TRow>({
 
     try {
       const sheet = await parseSpreadsheet(file);
-      // +2 so the number matches what the user sees in Excel: one for the
-      // header, one because spreadsheets count from 1.
+
       const mapped = sheet
         .map((row, index) => toRow(row, index + 2))
         .filter((row): row is TRow => row !== null);

@@ -20,11 +20,6 @@ interface SearchInputProps {
   endAddon?: ReactNode;
 }
 
-/**
- * `value`/`onValueChange` reflect the debounced (committed) search term — e.g. the nuqs-backed
- * URL state a caller feeds into a server query. Typing updates the visible input immediately;
- * `onValueChange` only fires `debounceMs` after the user stops typing.
- */
 function SearchInput({
   value,
   onValueChange,

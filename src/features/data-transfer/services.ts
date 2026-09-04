@@ -3,10 +3,6 @@ import type { ImportSummary } from "./types";
 
 export type ExportFormat = "csv" | "xlsx";
 
-/**
- * The browser downloads the file itself rather than the API streaming it
- * through fetch, so the response never has to be buffered in memory.
- */
 export async function downloadExport(
   businessId: string,
   resource: string,

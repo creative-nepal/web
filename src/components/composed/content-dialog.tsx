@@ -21,11 +21,6 @@ interface ContentDialogProps {
   children: React.ReactNode;
 }
 
-/**
- * A general-purpose controlled dialog for arbitrary content (forms, details, previews).
- * For destructive/confirm actions, use `ConfirmDialog` instead — it's built on `AlertDialog`,
- * which is the accessible primitive for that pattern.
- */
 function ContentDialog({
   open,
   onOpenChange,

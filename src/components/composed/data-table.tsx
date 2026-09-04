@@ -59,12 +59,6 @@ interface DataTableProps<TData extends object> {
   pageSizeOptions?: number[];
 }
 
-/**
- * Sorting, filtering, and pagination are always server-driven: `data`/`rowCount` are the
- * server's response for the current `sorting`/`columnFilters`/`pagination` state, which the
- * caller typically persists via nuqs. No client row models (filtered/sorted/paginated) are
- * wired in, so this component never re-sorts, re-filters, or re-paginates `data` itself.
- */
 function DataTable<TData extends object>({
   columns,
   data,

@@ -39,6 +39,6 @@ export interface UploadTicket {
 
 export interface DownloadTarget {
   url: string;
-  /** null when the file is public, so the URL is safe to persist. */
+
   expiresInSeconds: number | null;
 }
