@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
+import { ExportMenu } from "@/features/data-transfer/components/export-menu";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { productsQueryOptions } from "@/features/products/queries";
 import { menuQueryOptions } from "@/features/restaurant/queries";
@@ -104,6 +105,7 @@ export function WastageView() {
       <PageHeader
         title={t("ui.web.wastage.title")}
         description={t("ui.web.wastage.description")}
+        actions={<ExportMenu businessId={business.id} resource="wastage" />}
       />
 
       <Can permission={{ wastage: ["record"] }}>

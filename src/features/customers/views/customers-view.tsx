@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
+import { ExportMenu } from "@/features/data-transfer/components/export-menu";
+import { ImportDialog } from "@/features/data-transfer/components/import-dialog";
+import { rupeesToCents, type SheetRow } from "@/features/data-transfer/parse";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { money } from "@/lib/money";
 import {
@@ -145,6 +148,7 @@ export function CustomersView() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [importing, setImporting] = useState(false);
   const [limit, setLimit] = useState("");
 
   const { data, isFetching } = useQuery(
@@ -194,6 +198,45 @@ export function CustomersView() {
       <PageHeader
         title={t("ui.web.customers.title")}
         description={t("ui.web.customers.description")}
+        actions={
+          <div className="flex gap-2">
+            <ExportMenu businessId={business.id} resource="customers" />
+            <Can permission={{ business: ["manage"] }}>
+              <Button variant="outline" onClick={() => setImporting(true)}>
+                {t("ui.web.data.import")}
+              </Button>
+            </Can>
+          </div>
+        }
+      />
+
+      <ImportDialog
+        businessId={business.id}
+        resource="customers"
+        open={importing}
+        onOpenChange={setImporting}
+        note={t("ui.web.data.balanceNote")}
+        onDone={() =>
+          queryClient.invalidateQueries({ queryKey: customerQueryKeys.all })
+        }
+        toRow={(row: SheetRow, rowNumber) => {
+          const name = row.name ?? "";
+
+          if (!name) {
+            return null;
+          }
+
+          return {
+            rowNumber,
+            name,
+            ...(row.phone ? { phone: row.phone } : {}),
+            ...(row.email ? { email: row.email } : {}),
+            ...(row.pan ? { panNumber: row.pan } : {}),
+            ...(rupeesToCents(row.creditlimit ?? "") !== undefined && {
+              creditLimitCents: rupeesToCents(row.creditlimit ?? ""),
+            }),
+          };
+        }}
       />
 
       <Can permission={{ order: ["create"] }}>

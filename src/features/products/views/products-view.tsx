@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/table";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
+import { ExportMenu } from "@/features/data-transfer/components/export-menu";
+import { ImportDialog } from "@/features/data-transfer/components/import-dialog";
+import {
+  rupeesToCents,
+  type SheetRow,
+  toNumber,
+} from "@/features/data-transfer/parse";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { formatCurrency } from "@/lib/formatters";
 import { PackingDialog } from "../components/packing-dialog";
@@ -30,6 +37,7 @@ export function ProductsView() {
   const business = useCurrentBusiness();
   const [search, setSearch] = useState("");
   const [packing, setPacking] = useState<Product | null>(null);
+  const [importing, setImporting] = useState(false);
   const { data, isFetching } = useQuery(
     productsQueryOptions(business?.id ?? "", search),
   );
@@ -48,6 +56,16 @@ export function ProductsView() {
           isMedical
             ? t("ui.web.products.descriptionBatch")
             : t("ui.web.products.descriptionPlain")
+        }
+        actions={
+          <div className="flex gap-2">
+            <ExportMenu businessId={business.id} resource="products" />
+            <Can permission={{ product: ["create"] }}>
+              <Button variant="outline" onClick={() => setImporting(true)}>
+                {t("ui.web.data.import")}
+              </Button>
+            </Can>
+          </div>
         }
       />
 
@@ -130,6 +148,45 @@ export function ProductsView() {
           </TableBody>
         </Table>
       )}
+
+      <ImportDialog
+        businessId={business.id}
+        resource="products"
+        open={importing}
+        onOpenChange={setImporting}
+        note={t("ui.web.data.stockNote")}
+        onDone={() => setSearch("")}
+        toRow={(row: SheetRow, rowNumber) => {
+          const name = row.name ?? "";
+          const priceCents = rupeesToCents(row.price ?? "");
+
+          if (!name || priceCents === undefined) {
+            return null;
+          }
+
+          return {
+            rowNumber,
+            name,
+            priceCents,
+            ...(row.sku ? { sku: row.sku } : {}),
+            ...(row.unit ? { unitType: row.unit } : {}),
+            ...(toNumber(row.unitsperpack ?? "") !== undefined && {
+              unitsPerPack: toNumber(row.unitsperpack ?? ""),
+            }),
+            ...(rupeesToCents(row.costprice ?? "") !== undefined && {
+              costPriceCents: rupeesToCents(row.costprice ?? ""),
+            }),
+            ...(toNumber(row.stock ?? "") !== undefined && {
+              stockQty: toNumber(row.stock ?? ""),
+            }),
+            ...(toNumber(row.lowstockat ?? "") !== undefined && {
+              lowStockThreshold: toNumber(row.lowstockat ?? ""),
+            }),
+            ...(row.genericname ? { genericName: row.genericname } : {}),
+            ...(row.rack ? { rackLocation: row.rack } : {}),
+          };
+        }}
+      />
 
       <PackingDialog
         businessId={business.id}

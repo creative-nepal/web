@@ -33,6 +33,7 @@ import {
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
 import { PAYMENT_METHODS } from "@/features/cash/types";
+import { ExportMenu } from "@/features/data-transfer/components/export-menu";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { apiErrorMessage } from "@/lib/api-error";
 import { money } from "@/lib/money";
@@ -87,6 +88,7 @@ export function ExpensesView() {
       <PageHeader
         title={t("ui.web.expenses.title")}
         description={t("ui.web.expenses.description")}
+        actions={<ExportMenu businessId={business.id} resource="expenses" />}
       />
 
       <Can permission={{ expense: ["record"] }}>
