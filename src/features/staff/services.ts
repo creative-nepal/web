@@ -1,4 +1,6 @@
+import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
+import type { PaginatedResult } from "@/types/api";
 
 export interface StaffMember {
   id: string;
@@ -106,4 +108,38 @@ export async function removeMember(
 
 export async function cancelInvitation(invitationId: string): Promise<void> {
   unwrap(await authClient.organization.cancelInvitation({ invitationId }));
+}
+
+export interface MemberWithBranches {
+  memberId: string;
+  userId: string;
+  role: string;
+  name: string;
+  email: string;
+  joinedAt: string;
+  branchIds: string[];
+  allBranches: boolean;
+}
+
+export async function listMembersWithBranches(
+  businessId: string,
+  params: { search?: string; limit?: number } = {},
+): Promise<PaginatedResult<MemberWithBranches>> {
+  const { data } = await api.get<PaginatedResult<MemberWithBranches>>(
+    `/api/v1/businesses/${businessId}/members`,
+    { params: { limit: 50, ...params } },
+  );
+  return data;
+}
+
+export async function setMemberBranches(
+  businessId: string,
+  memberId: string,
+  branchIds: string[],
+): Promise<MemberWithBranches> {
+  const { data } = await api.put<MemberWithBranches>(
+    `/api/v1/businesses/${businessId}/members/${memberId}/branches`,
+    { branchIds },
+  );
+  return data;
 }

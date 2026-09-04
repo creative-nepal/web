@@ -1,5 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
-import { listInvitations, listMembers } from "./services";
+import {
+  listInvitations,
+  listMembers,
+  listMembersWithBranches,
+} from "./services";
 
 export const staffQueryKeys = {
   all: ["staff"] as const,
@@ -22,5 +26,19 @@ export function invitationsQueryOptions(organizationId: string) {
     queryKey: staffQueryKeys.invitations(organizationId),
     queryFn: () => listInvitations(organizationId),
     enabled: Boolean(organizationId),
+  });
+}
+
+export function membersWithBranchesQueryOptions(
+  businessId: string,
+  search: string,
+) {
+  return queryOptions({
+    queryKey: [...staffQueryKeys.all, "members-branches", businessId, search],
+    queryFn: () =>
+      listMembersWithBranches(businessId, {
+        ...(search ? { search } : {}),
+      }),
+    enabled: Boolean(businessId),
   });
 }

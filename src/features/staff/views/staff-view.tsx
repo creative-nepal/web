@@ -25,11 +25,14 @@ import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { useAssignableRoles } from "@/features/roles/hooks/use-assignable-roles";
+import { BranchAccessDialog } from "../components/branch-access-dialog";
 import {
   invitationsQueryOptions,
   membersQueryOptions,
+  membersWithBranchesQueryOptions,
   staffQueryKeys,
 } from "../queries";
+import type { MemberWithBranches } from "../services";
 import {
   cancelInvitation,
   changeMemberRole,
@@ -52,6 +55,14 @@ export function StaffView() {
   } | null>(null);
 
   const { data: members } = useQuery(membersQueryOptions(organizationId));
+  const { data: withBranches } = useQuery(
+    membersWithBranchesQueryOptions(business?.id ?? "", ""),
+  );
+  const [assigning, setAssigning] = useState<MemberWithBranches | null>(null);
+
+  const branchInfo = new Map(
+    (withBranches?.data ?? []).map((entry) => [entry.userId, entry]),
+  );
   const { data: invitations } = useQuery(
     invitationsQueryOptions(organizationId),
   );
@@ -170,6 +181,7 @@ export function StaffView() {
             <TableRow>
               <TableHead>{t("ui.web.staff.member")}</TableHead>
               <TableHead>{t("ui.field.role")}</TableHead>
+              <TableHead>{t("ui.web.staff.branches")}</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -215,6 +227,41 @@ export function StaffView() {
                       </NativeSelect>
                     </Can>
                   )}
+                </TableCell>
+                <TableCell>
+                  <Can
+                    permission={{ member: ["update"] }}
+                    fallback={
+                      <span className="text-muted-foreground text-sm">
+                        {branchInfo.get(member.userId)?.allBranches === false
+                          ? t("ui.web.staff.restricted", {
+                              count:
+                                branchInfo.get(member.userId)?.branchIds
+                                  .length ?? 0,
+                            })
+                          : t("ui.web.staff.allBranches")}
+                      </span>
+                    }
+                  >
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const entry = branchInfo.get(member.userId);
+                        if (entry) {
+                          setAssigning(entry);
+                        }
+                      }}
+                    >
+                      {branchInfo.get(member.userId)?.allBranches === false
+                        ? t("ui.web.staff.restricted", {
+                            count:
+                              branchInfo.get(member.userId)?.branchIds.length ??
+                              0,
+                          })
+                        : t("ui.web.staff.allBranches")}
+                    </Button>
+                  </Can>
                 </TableCell>
                 <TableCell>
                   {member.role !== "owner" && (
@@ -281,6 +328,11 @@ export function StaffView() {
           </Table>
         </div>
       )}
+      <BranchAccessDialog
+        businessId={business?.id ?? ""}
+        member={assigning}
+        onOpenChange={(open) => !open && setAssigning(null)}
+      />
     </div>
   );
 }
