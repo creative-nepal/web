@@ -259,6 +259,9 @@ export function CustomersView() {
               <TableHead>{t("ui.field.phone")}</TableHead>
               <TableHead>{t("ui.field.email")}</TableHead>
               <TableHead className="text-right">
+                {t("ui.web.loyalty.points")}
+              </TableHead>
+              <TableHead className="text-right">
                 {t("ui.web.customers.creditLimit")}
               </TableHead>
               <TableHead className="text-right">
@@ -274,6 +277,11 @@ export function CustomersView() {
                 <TableCell>{customer.phone ?? "—"}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {customer.email ?? "—"}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {business.loyaltyPointsPerHundred > 0
+                    ? customer.loyaltyPoints
+                    : "—"}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {money(customer.creditLimitCents)}

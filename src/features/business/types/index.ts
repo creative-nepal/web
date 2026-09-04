@@ -11,6 +11,8 @@ export interface Business {
   cbmsRequired: boolean;
   serviceChargePercent: number;
   maxDiscountPercent: number;
+  loyaltyPointsPerHundred: number;
+  loyaltyPointValueCents: number;
   fiscalYearStartMonth: number;
   displayName: string | null;
   theme: {

@@ -4,6 +4,7 @@ export interface Customer {
   phone: string | null;
   email: string | null;
   panNumber: string | null;
+  loyaltyPoints: number;
   creditLimitCents: number;
   balanceCents: number;
   createdAt: string;

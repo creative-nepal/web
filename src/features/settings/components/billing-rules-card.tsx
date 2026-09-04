@@ -33,16 +33,26 @@ export function BillingRulesCard({ business }: { business: Business }) {
   const [maxDiscountPercent, setMaxDiscountPercent] = useState(
     business.maxDiscountPercent,
   );
+  const [loyaltyPointsPerHundred, setLoyaltyPointsPerHundred] = useState(
+    business.loyaltyPointsPerHundred,
+  );
+  const [loyaltyPointValueCents, setLoyaltyPointValueCents] = useState(
+    business.loyaltyPointValueCents,
+  );
 
   const dirty =
     serviceChargePercent !== business.serviceChargePercent ||
-    maxDiscountPercent !== business.maxDiscountPercent;
+    maxDiscountPercent !== business.maxDiscountPercent ||
+    loyaltyPointsPerHundred !== business.loyaltyPointsPerHundred ||
+    loyaltyPointValueCents !== business.loyaltyPointValueCents;
 
   const save = useMutation({
     mutationFn: async () => {
       await api.patch(`/api/v1/businesses/${business.id}`, {
         serviceChargePercent,
         maxDiscountPercent,
+        loyaltyPointsPerHundred,
+        loyaltyPointValueCents,
       });
     },
     onSuccess: () => {
@@ -96,6 +106,40 @@ export function BillingRulesCard({ business }: { business: Business }) {
           <p className="text-muted-foreground text-xs">
             {t("ui.web.settings.maxDiscountPercentHint")}
           </p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="loyaltyPointsPerHundred">
+            {t("ui.web.loyalty.pointsPerHundred")}
+          </Label>
+          <Input
+            id="loyaltyPointsPerHundred"
+            type="number"
+            min={0}
+            max={100}
+            value={loyaltyPointsPerHundred}
+            onChange={(event) =>
+              setLoyaltyPointsPerHundred(clampPercent(event.target.value))
+            }
+          />
+          <p className="text-muted-foreground text-xs">
+            {t("ui.web.loyalty.loyaltyHint")}
+          </p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="loyaltyPointValueCents">
+            {t("ui.web.loyalty.pointValue")}
+          </Label>
+          <Input
+            id="loyaltyPointValueCents"
+            type="number"
+            min={0}
+            value={loyaltyPointValueCents}
+            onChange={(event) =>
+              setLoyaltyPointValueCents(
+                Math.max(0, Number(event.target.value) || 0),
+              )
+            }
+          />
         </div>
         <Button
           className="w-fit"

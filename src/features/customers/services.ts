@@ -52,3 +52,27 @@ export async function recordPayment(
   );
   return data;
 }
+
+export interface LoyaltyEntry {
+  id: string;
+  type: "earned" | "redeemed" | "adjusted";
+  points: number;
+  balanceAfter: number;
+  note: string | null;
+  createdAt: string;
+}
+
+export async function redeemPoints(
+  businessId: string,
+  customerId: string,
+  points: number,
+): Promise<{ entry: LoyaltyEntry; valueCents: number }> {
+  const { data } = await api.post<{
+    entry: LoyaltyEntry;
+    valueCents: number;
+  }>(
+    `/api/v1/businesses/${businessId}/customers/${customerId}/loyalty/redeem`,
+    { points },
+  );
+  return data;
+}
