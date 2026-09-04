@@ -7,10 +7,11 @@ export async function downloadExport(
   businessId: string,
   resource: string,
   format: ExportFormat,
+  params: Record<string, string> = {},
 ): Promise<void> {
   const response = await api.get(
     `/api/v1/businesses/${businessId}/${resource}/export`,
-    { params: { format }, responseType: "blob" },
+    { params: { ...params, format }, responseType: "blob" },
   );
 
   const disposition = String(response.headers["content-disposition"] ?? "");
@@ -19,7 +20,7 @@ export async function downloadExport(
   const url = URL.createObjectURL(response.data as Blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = match?.[1] ?? `${resource}.${format}`;
+  link.download = match?.[1] ?? `${resource.replaceAll("/", "-")}.${format}`;
   document.body.append(link);
   link.click();
   link.remove();

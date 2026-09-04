@@ -18,11 +18,12 @@ export function ExportMenu({
   businessId,
   resource,
   label,
+  params,
 }: {
   businessId: string;
   resource: string;
-
   label?: string;
+  params?: Record<string, string>;
 }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
@@ -30,7 +31,7 @@ export function ExportMenu({
   const run = async (format: "csv" | "xlsx") => {
     setBusy(true);
     try {
-      await downloadExport(businessId, resource, format);
+      await downloadExport(businessId, resource, format, params);
     } catch (error) {
       toast.error(apiErrorMessage(error, t("ui.web.data.exportFailed")));
     } finally {
