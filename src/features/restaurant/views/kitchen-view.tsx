@@ -77,6 +77,11 @@ export function KitchenView() {
                               .join(", ")}
                           </span>
                         )}
+                        {item.note && (
+                          <span className="block font-medium text-destructive text-xs">
+                            {item.note}
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -59,6 +59,7 @@ export interface KitchenTicket {
     orderItemId: string;
     name: string;
     quantity: number;
+    note: string | null;
     modifiers: Array<{ name: string; label: string }>;
     status: string;
   }>;
