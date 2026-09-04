@@ -139,7 +139,11 @@ export function PosView() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title={t("ui.web.pos.title")}
-        description={`${business.legalName}${business.vatRegistered ? " · VAT registered" : ""}`}
+        description={`${business.legalName}${
+          business.vatRegistered
+            ? ` · ${t("ui.web.settings.vatRegistered")}`
+            : ""
+        }`}
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">

@@ -9,6 +9,7 @@ import { DataSection } from "@/components/data-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCurrentBusiness } from "@/features/business/business-provider";
+import { ExportMenu } from "@/features/data-transfer/components/export-menu";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { InvoiceTable } from "../components/invoice-table";
 import { PaginationControls } from "../components/pagination-controls";
@@ -84,6 +85,16 @@ export function InvoicesView() {
         description={t("ui.web.invoices.description")}
         actions={
           <div className="flex gap-2">
+            <ExportMenu
+              businessId={business.id}
+              resource="invoices"
+              label={t("ui.web.data.exportInvoices")}
+            />
+            <ExportMenu
+              businessId={business.id}
+              resource="orders"
+              label={t("ui.web.data.exportSold")}
+            />
             {(["xlsx", "csv"] as const).map((format) => (
               <Button
                 key={format}
@@ -93,7 +104,9 @@ export function InvoicesView() {
                   downloadSalesRegister(business.id, fiscalYear, format)
                 }
               >
-                {format === "xlsx" ? "Register (Excel)" : "CSV"}
+                {format === "xlsx"
+                  ? t("ui.web.invoices.registerExcel")
+                  : t("ui.web.invoices.registerCsv")}
               </Button>
             ))}
           </div>

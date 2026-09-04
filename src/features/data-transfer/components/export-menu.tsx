@@ -17,9 +17,12 @@ import { downloadExport } from "../services";
 export function ExportMenu({
   businessId,
   resource,
+  label,
 }: {
   businessId: string;
   resource: string;
+  /** Needed only where two exports sit together and must be told apart. */
+  label?: string;
 }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
@@ -41,7 +44,9 @@ export function ExportMenu({
         render={
           <Button variant="outline" disabled={busy}>
             <RiDownload2Line />
-            {busy ? t("ui.web.data.exporting") : t("ui.web.data.export")}
+            {busy
+              ? t("ui.web.data.exporting")
+              : (label ?? t("ui.web.data.export"))}
           </Button>
         }
       />
