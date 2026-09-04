@@ -11,12 +11,15 @@ import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import {
   BS_MONTH_NAMES,
+  bsMonthGrid,
   bsMonthWindow,
   shiftBsMonth,
   toBs,
+  toDevanagari,
 } from "@/lib/formatters/nepali-date";
 import { useLanguageStore } from "@/stores/language-store";
 import { EventDialog } from "../components/event-dialog";
+import { MonthGrid } from "../components/month-grid";
 import { calendarFeedQueryOptions } from "../queries";
 import type { CalendarEntry, CalendarScope } from "../types";
 
@@ -30,6 +33,7 @@ const SCOPE_VARIANT: Record<
 };
 
 type Mode = "bs" | "ad";
+type Layout = "grid" | "list";
 
 function adMonthWindow(anchor: Date): { from: Date; to: Date } {
   const from = new Date(
@@ -67,6 +71,8 @@ export function CalendarView() {
     return { year: now.year, month: now.month };
   });
   const [adding, setAdding] = useState(false);
+  const [layout, setLayout] = useState<Layout>("grid");
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   const window = useMemo(
     () =>
@@ -85,6 +91,17 @@ export function CalendarView() {
   );
 
   const grouped = useMemo(() => groupByDay(entries ?? []), [entries]);
+
+  const entriesByDay = useMemo(() => new Map(grouped), [grouped]);
+
+  const weeks = useMemo(
+    () => bsMonthGrid(bsAnchor.year, bsAnchor.month),
+    [bsAnchor],
+  );
+
+  const selectedEntries = selectedDay
+    ? (entriesByDay.get(selectedDay) ?? [])
+    : [];
 
   if (!business) {
     return null;
@@ -129,6 +146,22 @@ export function CalendarView() {
             <div className="flex gap-1">
               <Button
                 size="sm"
+                variant={layout === "grid" ? "default" : "outline"}
+                onClick={() => setLayout("grid")}
+              >
+                {t("ui.web.calendar.grid")}
+              </Button>
+              <Button
+                size="sm"
+                variant={layout === "list" ? "default" : "outline"}
+                onClick={() => setLayout("list")}
+              >
+                {t("ui.web.calendar.list")}
+              </Button>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                size="sm"
                 variant={mode === "bs" ? "default" : "outline"}
                 onClick={() => setMode("bs")}
               >
@@ -165,7 +198,65 @@ export function CalendarView() {
         }
       />
 
-      {!isFetching && grouped.length === 0 ? (
+      {layout === "grid" && mode === "bs" ? (
+        <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
+          <MonthGrid
+            weeks={weeks}
+            entriesByDay={entriesByDay}
+            language={language}
+            selectedDay={selectedDay}
+            onSelectDay={setSelectedDay}
+          />
+
+          <div className="flex flex-col gap-3 rounded-lg border p-4">
+            {selectedDay ? (
+              <>
+                <span className="font-medium text-sm">
+                  {language === "ne"
+                    ? (entriesByDay.get(selectedDay)?.[0]?.date.bsNepali ??
+                      toDevanagari(selectedDay))
+                    : (entriesByDay.get(selectedDay)?.[0]?.date.bsLong ??
+                      selectedDay)}
+                </span>
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {selectedDay}
+                </span>
+
+                {selectedEntries.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">
+                    {t("ui.web.calendar.empty")}
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {selectedEntries.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className="flex flex-col gap-1 rounded-lg border p-2"
+                      >
+                        <span className="text-sm">{entry.title}</span>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant={SCOPE_VARIANT[entry.scope]}>
+                            {t(`ui.web.calendar.${entry.scope}`)}
+                          </Badge>
+                          {entry.source !== "event" && (
+                            <Badge variant="outline">
+                              {t(`ui.web.calendar.${entry.source}`)}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {t("ui.web.calendar.noPanchang")}
+              </p>
+            )}
+          </div>
+        </div>
+      ) : !isFetching && grouped.length === 0 ? (
         <EmptyState
           title={t("ui.web.calendar.empty")}
           description={t("ui.web.calendar.emptyHint")}
@@ -202,7 +293,7 @@ export function CalendarView() {
                     >
                       <span className="w-14 shrink-0 text-muted-foreground text-xs tabular-nums">
                         {entry.allDay
-                          ? "—"
+                          ? "\u2014"
                           : new Date(entry.startsAt).toLocaleTimeString(
                               undefined,
                               { hour: "2-digit", minute: "2-digit" },

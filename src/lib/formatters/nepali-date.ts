@@ -110,3 +110,102 @@ export function shiftBsMonth(
 
   return { year: Math.floor(index / 12), month: (index % 12) + 1 };
 }
+
+const DEVANAGARI = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+
+export function toDevanagari(value: number | string): string {
+  return String(value).replace(/[0-9]/g, (digit) => DEVANAGARI[Number(digit)]);
+}
+
+export const BS_WEEKDAYS_NE = [
+  "आइत",
+  "सोम",
+  "मंगल",
+  "बुध",
+  "बिहि",
+  "शुक्र",
+  "शनि",
+] as const;
+
+export const BS_WEEKDAYS_EN = [
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+] as const;
+
+export interface GridCell {
+  bsDay: number;
+  ad: string;
+  adDay: number;
+  weekday: number;
+  inMonth: boolean;
+  isToday: boolean;
+  isSaturday: boolean;
+}
+
+function adKey(instant: Date): string {
+  const shifted = new Date(
+    instant.getTime() + NEPAL_UTC_OFFSET_MINUTES * 60_000,
+  );
+
+  return shifted.toISOString().slice(0, 10);
+}
+
+export function bsMonthGrid(year: number, month: number): GridCell[][] {
+  const days = bsMonthLength(year, month);
+  const todayKey = adKey(new Date());
+
+  const cells: GridCell[] = [];
+
+  for (let day = 1; day <= days; day += 1) {
+    const start = fromBs(year, month, day);
+    const noon = new Date(start.getTime() + 12 * 3_600_000);
+    const key = adKey(start);
+    const weekday = noon.getUTCDay();
+
+    cells.push({
+      bsDay: day,
+      ad: key,
+      adDay: Number(key.slice(8, 10)),
+      weekday,
+      inMonth: true,
+      isToday: key === todayKey,
+      isSaturday: weekday === 6,
+    });
+  }
+
+  const leading = cells[0]?.weekday ?? 0;
+  const padded: (GridCell | null)[] = [
+    ...Array.from({ length: leading }, () => null),
+    ...cells,
+  ];
+
+  while (padded.length % 7 !== 0) {
+    padded.push(null);
+  }
+
+  const weeks: GridCell[][] = [];
+
+  for (let index = 0; index < padded.length; index += 7) {
+    weeks.push(
+      padded.slice(index, index + 7).map(
+        (cell, offset) =>
+          cell ?? {
+            bsDay: 0,
+            ad: "",
+            adDay: 0,
+            weekday: offset,
+            inMonth: false,
+            isToday: false,
+            isSaturday: offset === 6,
+          },
+      ),
+    );
+  }
+
+  return weeks;
+}
