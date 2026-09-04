@@ -1,5 +1,11 @@
 import { api } from "@/lib/api";
-import type { FilePurpose, StoredFile, UploadTicket } from "./types";
+import type {
+  DownloadTarget,
+  FilePurpose,
+  StoredFile,
+  UploadTicket,
+} from "./types";
+import { maxBytesFor } from "./types";
 
 async function createUpload(
   businessId: string,
@@ -38,6 +44,14 @@ export async function uploadFile(
   file: File,
   purpose: FilePurpose,
 ): Promise<StoredFile> {
+  const limit = maxBytesFor(file.type);
+
+  if (file.size > limit) {
+    throw new Error(
+      `${file.name} is ${Math.round(file.size / 1024 / 1024)}MB; the limit is ${Math.round(limit / 1024 / 1024)}MB`,
+    );
+  }
+
   const ticket = await createUpload(businessId, file, purpose);
 
   const response = await fetch(ticket.uploadUrl, {
@@ -57,10 +71,23 @@ export async function getDownloadUrl(
   businessId: string,
   fileId: string,
 ): Promise<string> {
-  const { data } = await api.get<{ url: string }>(
+  const { url } = await getDownloadTarget(businessId, fileId);
+  return url;
+}
+
+/**
+ * Prefer this where the URL will be stored — a CMS block, a theme logo. A
+ * public file's URL is permanent; a private one expires and must be fetched
+ * again each time it is shown.
+ */
+export async function getDownloadTarget(
+  businessId: string,
+  fileId: string,
+): Promise<DownloadTarget> {
+  const { data } = await api.get<DownloadTarget>(
     `/api/v1/businesses/${businessId}/files/${fileId}/download`,
   );
-  return data.url;
+  return data;
 }
 
 export function publicFileUrl(fileId: string): string {

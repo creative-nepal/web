@@ -23,6 +23,8 @@ interface UploadedFile {
   id: string;
   url: string;
   name?: string;
+  /** Lets the preview play a video rather than showing a file icon. */
+  contentType?: string;
 }
 
 interface FileUploadProps {
@@ -102,6 +104,9 @@ function FileUpload({
             <Spinner />
           ) : error ? (
             <RiErrorWarningLine />
+          ) : value?.contentType?.startsWith("video/") ? (
+            // biome-ignore lint/a11y/useMediaCaption: user-uploaded clip with no caption track
+            <video src={value.url} controls preload="metadata" />
           ) : value && image ? (
             // biome-ignore lint/performance/noImgElement: a signed, short-lived object-storage URL that next/image cannot cache
             <img src={value.url} alt="" />
