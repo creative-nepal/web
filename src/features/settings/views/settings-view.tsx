@@ -12,6 +12,7 @@ import { BillingRulesCard } from "../components/billing-rules-card";
 import { BrandingCard } from "../components/branding-card";
 import { BusinessDetailsCard } from "../components/business-details-card";
 import { PlanCard } from "../components/plan-card";
+import { PreferencesCard } from "../components/preferences-card";
 
 export function SettingsView() {
   const { t } = useTranslation();
@@ -30,6 +31,8 @@ export function SettingsView() {
         description={t("ui.web.settings.description")}
       />
       <BusinessDetailsCard business={business} />
+
+      <PreferencesCard business={business} />
 
       <Can permission={{ business: ["manage"] }}>
         <BillingRulesCard business={business} />
