@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import {
+  BS_MONTH_NAMES,
+  bsMonthWindow,
+  shiftBsMonth,
+  toBs,
+} from "@/lib/formatters/nepali-date";
+import { useLanguageStore } from "@/stores/language-store";
 import { EventDialog } from "../components/event-dialog";
 import { calendarFeedQueryOptions } from "../queries";
 import type { CalendarEntry, CalendarScope } from "../types";
@@ -22,21 +29,26 @@ const SCOPE_VARIANT: Record<
   personal: "outline",
 };
 
-function startOfMonth(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-}
+type Mode = "bs" | "ad";
 
-function addMonths(date: Date, months: number): Date {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1),
+function adMonthWindow(anchor: Date): { from: Date; to: Date } {
+  const from = new Date(
+    Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), 1),
   );
+
+  return {
+    from,
+    to: new Date(
+      Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth() + 1, 1) - 1,
+    ),
+  };
 }
 
 function groupByDay(entries: CalendarEntry[]): [string, CalendarEntry[]][] {
   const byDay = new Map<string, CalendarEntry[]>();
 
   for (const entry of entries) {
-    const day = entry.startsAt.slice(0, 10);
+    const day = entry.date.ad;
     byDay.set(day, [...(byDay.get(day) ?? []), entry]);
   }
 
@@ -45,16 +57,31 @@ function groupByDay(entries: CalendarEntry[]): [string, CalendarEntry[]][] {
 
 export function CalendarView() {
   const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
 
   const business = useCurrentBusiness();
-  const [anchor, setAnchor] = useState(() => startOfMonth(new Date()));
+  const [mode, setMode] = useState<Mode>("bs");
+  const [adAnchor, setAdAnchor] = useState(() => new Date());
+  const [bsAnchor, setBsAnchor] = useState(() => {
+    const now = toBs(new Date());
+    return { year: now.year, month: now.month };
+  });
   const [adding, setAdding] = useState(false);
 
-  const from = anchor.toISOString();
-  const to = addMonths(anchor, 1).toISOString();
+  const window = useMemo(
+    () =>
+      mode === "bs"
+        ? bsMonthWindow(bsAnchor.year, bsAnchor.month)
+        : adMonthWindow(adAnchor),
+    [mode, bsAnchor, adAnchor],
+  );
 
   const { data: entries, isFetching } = useQuery(
-    calendarFeedQueryOptions(business?.id ?? "", from, to),
+    calendarFeedQueryOptions(
+      business?.id ?? "",
+      window.from.toISOString(),
+      window.to.toISOString(),
+    ),
   );
 
   const grouped = useMemo(() => groupByDay(entries ?? []), [entries]);
@@ -63,11 +90,34 @@ export function CalendarView() {
     return null;
   }
 
-  const monthLabel = anchor.toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  const shift = (by: number) => {
+    if (mode === "bs") {
+      setBsAnchor(shiftBsMonth(bsAnchor.year, bsAnchor.month, by));
+      return;
+    }
+
+    setAdAnchor(
+      new Date(
+        Date.UTC(adAnchor.getUTCFullYear(), adAnchor.getUTCMonth() + by, 1),
+      ),
+    );
+  };
+
+  const label =
+    mode === "bs"
+      ? `${BS_MONTH_NAMES[bsAnchor.month - 1]} ${bsAnchor.year}`
+      : adAnchor.toLocaleDateString(undefined, {
+          month: "long",
+          year: "numeric",
+          timeZone: "UTC",
+        });
+
+  const subLabel =
+    mode === "bs"
+      ? `${window.from.toISOString().slice(0, 10)} — ${window.to
+          .toISOString()
+          .slice(0, 10)}`
+      : "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,22 +125,35 @@ export function CalendarView() {
         title={t("ui.web.calendar.title")}
         description={t("ui.web.calendar.description")}
         actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAnchor(addMonths(anchor, -1))}
-            >
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                variant={mode === "bs" ? "default" : "outline"}
+                onClick={() => setMode("bs")}
+              >
+                {t("ui.web.calendar.calendarBs")}
+              </Button>
+              <Button
+                size="sm"
+                variant={mode === "ad" ? "default" : "outline"}
+                onClick={() => setMode("ad")}
+              >
+                {t("ui.web.calendar.calendarAd")}
+              </Button>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => shift(-1)}>
               {t("ui.web.calendar.previous")}
             </Button>
-            <span className="min-w-36 text-center font-medium text-sm">
-              {monthLabel}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAnchor(addMonths(anchor, 1))}
-            >
+            <div className="flex min-w-44 flex-col items-center">
+              <span className="font-medium text-sm">{label}</span>
+              {subLabel && (
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {subLabel}
+                </span>
+              )}
+            </div>
+            <Button variant="outline" size="sm" onClick={() => shift(1)}>
               {t("ui.web.calendar.next")}
             </Button>
             <Can permission={{ calendar: ["manage"] }}>
@@ -109,48 +172,59 @@ export function CalendarView() {
         />
       ) : (
         <div className="flex flex-col gap-4">
-          {grouped.map(([day, dayEntries]) => (
-            <div key={day} className="flex gap-4">
-              <div className="w-28 shrink-0 pt-1">
-                <span className="font-medium text-sm">
-                  {new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined, {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                    timeZone: "UTC",
-                  })}
-                </span>
-              </div>
-              <div className="flex flex-1 flex-col gap-2">
-                {dayEntries.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-center gap-3 rounded-lg border p-3"
-                  >
-                    <span className="w-14 shrink-0 text-muted-foreground text-xs tabular-nums">
-                      {entry.allDay
-                        ? "—"
-                        : new Date(entry.startsAt).toLocaleTimeString(
-                            undefined,
-                            { hour: "2-digit", minute: "2-digit" },
-                          )}
-                    </span>
-                    <span className="flex-1 truncate text-sm">
-                      {entry.title}
-                    </span>
-                    {entry.source !== "event" && (
-                      <Badge variant="outline">
-                        {t(`ui.web.calendar.${entry.source}`)}
-                      </Badge>
+          {grouped.map(([day, dayEntries]) => {
+            const date = dayEntries[0].date;
+
+            return (
+              <div key={day} className="flex gap-4">
+                <div className="flex w-40 shrink-0 flex-col pt-1">
+                  <span className="font-medium text-sm">
+                    {language === "ne" ? date.bsNepali : date.bsLong}
+                  </span>
+                  <span className="text-muted-foreground text-xs tabular-nums">
+                    {new Date(`${date.ad}T00:00:00Z`).toLocaleDateString(
+                      undefined,
+                      {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        timeZone: "UTC",
+                      },
                     )}
-                    <Badge variant={SCOPE_VARIANT[entry.scope]}>
-                      {t(`ui.web.calendar.${entry.scope}`)}
-                    </Badge>
-                  </div>
-                ))}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col gap-2">
+                  {dayEntries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center gap-3 rounded-lg border p-3"
+                    >
+                      <span className="w-14 shrink-0 text-muted-foreground text-xs tabular-nums">
+                        {entry.allDay
+                          ? "—"
+                          : new Date(entry.startsAt).toLocaleTimeString(
+                              undefined,
+                              { hour: "2-digit", minute: "2-digit" },
+                            )}
+                      </span>
+                      <span className="flex-1 truncate text-sm">
+                        {entry.title}
+                      </span>
+                      {entry.source !== "event" && (
+                        <Badge variant="outline">
+                          {t(`ui.web.calendar.${entry.source}`)}
+                        </Badge>
+                      )}
+                      <Badge variant={SCOPE_VARIANT[entry.scope]}>
+                        {t(`ui.web.calendar.${entry.scope}`)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

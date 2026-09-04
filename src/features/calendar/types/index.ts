@@ -26,6 +26,13 @@ export interface Recurrence {
   count?: number;
 }
 
+export interface DualDate {
+  ad: string;
+  bs: string;
+  bsLong: string;
+  bsNepali: string;
+}
+
 export interface CalendarEntry {
   id: string;
   source: "event" | "appointment" | "reservation";
@@ -34,6 +41,7 @@ export interface CalendarEntry {
   title: string;
   startsAt: string;
   endsAt: string | null;
+  date: DualDate;
   allDay: boolean;
   branchId: string | null;
   status: string;
