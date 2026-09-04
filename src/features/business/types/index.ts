@@ -13,6 +13,8 @@ export interface Business {
   maxDiscountPercent: number;
   loyaltyPointsPerHundred: number;
   loyaltyPointValueCents: number;
+  referralRewardPoints: number;
+  referralWelcomePoints: number;
   fiscalYearStartMonth: number;
   displayName: string | null;
   theme: {

@@ -39,12 +39,20 @@ export function BillingRulesCard({ business }: { business: Business }) {
   const [loyaltyPointValueCents, setLoyaltyPointValueCents] = useState(
     business.loyaltyPointValueCents,
   );
+  const [referralRewardPoints, setReferralRewardPoints] = useState(
+    business.referralRewardPoints,
+  );
+  const [referralWelcomePoints, setReferralWelcomePoints] = useState(
+    business.referralWelcomePoints,
+  );
 
   const dirty =
     serviceChargePercent !== business.serviceChargePercent ||
     maxDiscountPercent !== business.maxDiscountPercent ||
     loyaltyPointsPerHundred !== business.loyaltyPointsPerHundred ||
-    loyaltyPointValueCents !== business.loyaltyPointValueCents;
+    loyaltyPointValueCents !== business.loyaltyPointValueCents ||
+    referralRewardPoints !== business.referralRewardPoints ||
+    referralWelcomePoints !== business.referralWelcomePoints;
 
   const save = useMutation({
     mutationFn: async () => {
@@ -53,6 +61,8 @@ export function BillingRulesCard({ business }: { business: Business }) {
         maxDiscountPercent,
         loyaltyPointsPerHundred,
         loyaltyPointValueCents,
+        referralRewardPoints,
+        referralWelcomePoints,
       });
     },
     onSuccess: () => {
@@ -136,6 +146,41 @@ export function BillingRulesCard({ business }: { business: Business }) {
             value={loyaltyPointValueCents}
             onChange={(event) =>
               setLoyaltyPointValueCents(
+                Math.max(0, Number(event.target.value) || 0),
+              )
+            }
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="referralRewardPoints">
+            {t("ui.web.settings.referralRewardPoints")}
+          </Label>
+          <Input
+            id="referralRewardPoints"
+            type="number"
+            min={0}
+            value={referralRewardPoints}
+            onChange={(event) =>
+              setReferralRewardPoints(
+                Math.max(0, Number(event.target.value) || 0),
+              )
+            }
+          />
+          <p className="text-muted-foreground text-xs">
+            {t("ui.web.settings.referralHint")}
+          </p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="referralWelcomePoints">
+            {t("ui.web.settings.referralWelcomePoints")}
+          </Label>
+          <Input
+            id="referralWelcomePoints"
+            type="number"
+            min={0}
+            value={referralWelcomePoints}
+            onChange={(event) =>
+              setReferralWelcomePoints(
                 Math.max(0, Number(event.target.value) || 0),
               )
             }

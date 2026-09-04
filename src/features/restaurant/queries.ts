@@ -1,11 +1,19 @@
 import { queryOptions } from "@tanstack/react-query";
 import { KITCHEN_POLL_INTERVAL_MS } from "./constants";
-import { getRecipe, listMenu, listTables, listTickets } from "./services";
+import {
+  getRecipe,
+  listMenu,
+  listTableAreas,
+  listTables,
+  listTickets,
+} from "./services";
 
 export const restaurantQueryKeys = {
   all: ["restaurant"] as const,
   tables: (businessId: string) =>
     [...restaurantQueryKeys.all, "tables", businessId] as const,
+  tableAreas: (businessId: string) =>
+    [...restaurantQueryKeys.all, "table-areas", businessId] as const,
   menu: (businessId: string) =>
     [...restaurantQueryKeys.all, "menu", businessId] as const,
   tickets: (businessId: string, openOnly: boolean) =>
@@ -18,6 +26,14 @@ export function tablesQueryOptions(businessId: string) {
   return queryOptions({
     queryKey: restaurantQueryKeys.tables(businessId),
     queryFn: () => listTables(businessId),
+    enabled: Boolean(businessId),
+  });
+}
+
+export function tableAreasQueryOptions(businessId: string) {
+  return queryOptions({
+    queryKey: restaurantQueryKeys.tableAreas(businessId),
+    queryFn: () => listTableAreas(businessId),
     enabled: Boolean(businessId),
   });
 }

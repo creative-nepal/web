@@ -6,6 +6,7 @@ export interface CheckoutPayload {
     productId: string;
     quantity: number;
     discountCents?: number;
+    note?: string;
   }>;
   discountPercent?: number;
   discountReason?: string;

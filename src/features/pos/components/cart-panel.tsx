@@ -31,6 +31,7 @@ interface CartPanelProps {
   maxDiscountPercent: number;
   onDiscountPercentChange: (percent: number) => void;
   onQuantityChange: (productId: string, quantity: number) => void;
+  onNoteChange: (productId: string, note: string) => void;
   canSubmit: boolean;
   isSubmitting: boolean;
   onSubmit: () => void;
@@ -45,6 +46,7 @@ export function CartPanel({
   maxDiscountPercent,
   onDiscountPercentChange,
   onQuantityChange,
+  onNoteChange,
   canSubmit,
   isSubmitting,
   onSubmit,
@@ -62,34 +64,42 @@ export function CartPanel({
         ) : (
           <div className="flex flex-col gap-2">
             {lines.map((line) => (
-              <div
-                key={line.product.id}
-                className="flex items-center gap-2 text-sm"
-              >
-                <span className="flex flex-1 flex-col truncate">
-                  <span className="truncate">{line.product.name}</span>
-                  {isPacked(line.product) && (
-                    <span className="text-muted-foreground text-xs">
-                      {unitLabel(line.product)} ·{" "}
-                      {money(line.product.subUnitPriceCents)}
-                    </span>
-                  )}
-                </span>
+              <div key={line.product.id} className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="flex flex-1 flex-col truncate">
+                    <span className="truncate">{line.product.name}</span>
+                    {isPacked(line.product) && (
+                      <span className="text-muted-foreground text-xs">
+                        {unitLabel(line.product)} ·{" "}
+                        {money(line.product.subUnitPriceCents)}
+                      </span>
+                    )}
+                  </span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={line.quantity}
+                    onChange={(event) =>
+                      onQuantityChange(
+                        line.product.id,
+                        Number(event.target.value),
+                      )
+                    }
+                    className="h-8 w-16"
+                  />
+                  <span className="w-20 text-right tabular-nums">
+                    {money(lineTotalCents(line.product, line.quantity))}
+                  </span>
+                </div>
                 <Input
-                  type="number"
-                  min={0}
-                  value={line.quantity}
+                  value={line.note ?? ""}
                   onChange={(event) =>
-                    onQuantityChange(
-                      line.product.id,
-                      Number(event.target.value),
-                    )
+                    onNoteChange(line.product.id, event.target.value)
                   }
-                  className="h-8 w-16"
+                  placeholder={t("ui.web.pos.notePlaceholder")}
+                  maxLength={200}
+                  className="h-7 text-xs"
                 />
-                <span className="w-20 text-right tabular-nums">
-                  {money(lineTotalCents(line.product, line.quantity))}
-                </span>
               </div>
             ))}
           </div>

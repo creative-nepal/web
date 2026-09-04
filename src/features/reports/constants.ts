@@ -1,0 +1,1 @@
+export const LIVE_SALES_POLL_INTERVAL_MS = 30_000;

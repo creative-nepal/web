@@ -69,6 +69,7 @@ export function PosView() {
         items: cart.lines.map((line) => ({
           productId: line.product.id,
           quantity: line.quantity,
+          ...(line.note ? { note: line.note } : {}),
         })),
         ...(cart.discountPercent > 0 && {
           discountPercent: cart.discountPercent,
@@ -171,6 +172,7 @@ export function PosView() {
           maxDiscountPercent={cart.maxDiscountPercent}
           onDiscountPercentChange={cart.setDiscountPercent}
           onQuantityChange={cart.setQuantity}
+          onNoteChange={cart.setNote}
           canSubmit={canSubmit}
           isSubmitting={submit.isPending}
           onSubmit={() => submit.mutate()}

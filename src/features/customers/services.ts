@@ -76,3 +76,36 @@ export async function redeemPoints(
   );
   return data;
 }
+
+export interface ReferralSummary {
+  customerId: string;
+  referralCode: string;
+  referredByCustomerId: string | null;
+  referredByName: string | null;
+  referredCount: number;
+  pointsEarned: number;
+  rewardPoints: number;
+  welcomePoints: number;
+}
+
+export async function getReferral(
+  businessId: string,
+  customerId: string,
+): Promise<ReferralSummary> {
+  const { data } = await api.get<ReferralSummary>(
+    `/api/v1/businesses/${businessId}/customers/${customerId}/referral`,
+  );
+  return data;
+}
+
+export async function claimReferral(
+  businessId: string,
+  customerId: string,
+  code: string,
+): Promise<ReferralSummary> {
+  const { data } = await api.post<ReferralSummary>(
+    `/api/v1/businesses/${businessId}/customers/${customerId}/referral`,
+    { code },
+  );
+  return data;
+}

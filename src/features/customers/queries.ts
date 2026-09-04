@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getLedger, listCustomers } from "./services";
+import { getLedger, getReferral, listCustomers } from "./services";
 
 export const customerQueryKeys = {
   all: ["customers"] as const,
@@ -7,6 +7,8 @@ export const customerQueryKeys = {
     [...customerQueryKeys.all, businessId, search, owing] as const,
   ledger: (businessId: string, customerId: string) =>
     [...customerQueryKeys.all, "ledger", businessId, customerId] as const,
+  referral: (businessId: string, customerId: string) =>
+    [...customerQueryKeys.all, "referral", businessId, customerId] as const,
 };
 
 export function customersQueryOptions(
@@ -30,6 +32,14 @@ export function ledgerQueryOptions(businessId: string, customerId: string) {
   return queryOptions({
     queryKey: customerQueryKeys.ledger(businessId, customerId),
     queryFn: () => getLedger(businessId, customerId),
+    enabled: Boolean(businessId && customerId),
+  });
+}
+
+export function referralQueryOptions(businessId: string, customerId: string) {
+  return queryOptions({
+    queryKey: customerQueryKeys.referral(businessId, customerId),
+    queryFn: () => getReferral(businessId, customerId),
     enabled: Boolean(businessId && customerId),
   });
 }

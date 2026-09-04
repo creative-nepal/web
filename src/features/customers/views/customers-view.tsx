@@ -27,6 +27,7 @@ import { ImportDialog } from "@/features/data-transfer/components/import-dialog"
 import { rupeesToCents, type SheetRow } from "@/features/data-transfer/parse";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { money } from "@/lib/money";
+import { ReferralDialog } from "../components/referral-dialog";
 import {
   customerQueryKeys,
   customersQueryOptions,
@@ -145,6 +146,7 @@ export function CustomersView() {
   const [search, setSearch] = useState("");
   const [owingOnly, setOwingOnly] = useState(false);
   const [viewing, setViewing] = useState<Customer | null>(null);
+  const [referring, setReferring] = useState<Customer | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -192,6 +194,14 @@ export function CustomersView() {
           businessId={business.id}
           customer={viewing}
           onClose={() => setViewing(null)}
+        />
+      )}
+
+      {referring && (
+        <ReferralDialog
+          businessId={business.id}
+          customer={referring}
+          onClose={() => setReferring(null)}
         />
       )}
 
@@ -341,6 +351,13 @@ export function CustomersView() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setReferring(customer)}
+                  >
+                    {t("ui.web.customers.referralTitle")}
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"

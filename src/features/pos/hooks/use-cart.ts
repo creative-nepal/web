@@ -43,6 +43,16 @@ export function useCart(
     );
   }, []);
 
+  const setNote = useCallback((productId: string, note: string) => {
+    setLines((current) =>
+      current.map((line) =>
+        line.product.id === productId
+          ? { ...line, note: note.trim() ? note : undefined }
+          : line,
+      ),
+    );
+  }, []);
+
   const clear = useCallback(() => {
     setLines([]);
     setDiscountPercent(0);
@@ -80,6 +90,7 @@ export function useCart(
     lines,
     add,
     setQuantity,
+    setNote,
     clear,
     totals,
     discountPercent,
