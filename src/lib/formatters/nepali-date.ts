@@ -118,26 +118,28 @@ export function toDevanagari(value: number | string): string {
 }
 
 export const BS_WEEKDAYS_NE = [
-  "आइत",
-  "सोम",
-  "मंगल",
-  "बुध",
-  "बिहि",
-  "शुक्र",
-  "शनि",
+  "आइतवार",
+  "सोमवार",
+  "मंगलवार",
+  "बुधवार",
+  "बिहिवार",
+  "शुक्रवार",
+  "शनिवार",
 ] as const;
 
 export const BS_WEEKDAYS_EN = [
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
 ] as const;
 
 export interface GridCell {
+  bsYear: number;
+  bsMonth: number;
   bsDay: number;
   ad: string;
   adDay: number;
@@ -145,6 +147,7 @@ export interface GridCell {
   inMonth: boolean;
   isToday: boolean;
   isSaturday: boolean;
+  isSunday: boolean;
 }
 
 function adKey(instant: Date): string {
@@ -155,57 +158,88 @@ function adKey(instant: Date): string {
   return shifted.toISOString().slice(0, 10);
 }
 
+function cellFor(
+  year: number,
+  month: number,
+  day: number,
+  inMonth: boolean,
+  todayKey: string,
+): GridCell {
+  const start = fromBs(year, month, day);
+  const noon = new Date(start.getTime() + 12 * 3_600_000);
+  const key = adKey(start);
+  const weekday = noon.getUTCDay();
+
+  return {
+    bsYear: year,
+    bsMonth: month,
+    bsDay: day,
+    ad: key,
+    adDay: Number(key.slice(8, 10)),
+    weekday,
+    inMonth,
+    isToday: key === todayKey,
+    isSaturday: weekday === 6,
+    isSunday: weekday === 0,
+  };
+}
+
 export function bsMonthGrid(year: number, month: number): GridCell[][] {
   const days = bsMonthLength(year, month);
   const todayKey = adKey(new Date());
 
-  const cells: GridCell[] = [];
+  const current = Array.from({ length: days }, (_, index) =>
+    cellFor(year, month, index + 1, true, todayKey),
+  );
 
-  for (let day = 1; day <= days; day += 1) {
-    const start = fromBs(year, month, day);
-    const noon = new Date(start.getTime() + 12 * 3_600_000);
-    const key = adKey(start);
-    const weekday = noon.getUTCDay();
+  const leading = current[0].weekday;
+  const previous = shiftBsMonth(year, month, -1);
+  const previousLength = bsMonthLength(previous.year, previous.month);
 
-    cells.push({
-      bsDay: day,
-      ad: key,
-      adDay: Number(key.slice(8, 10)),
-      weekday,
-      inMonth: true,
-      isToday: key === todayKey,
-      isSaturday: weekday === 6,
-    });
-  }
+  const before = Array.from({ length: leading }, (_, index) =>
+    cellFor(
+      previous.year,
+      previous.month,
+      previousLength - leading + index + 1,
+      false,
+      todayKey,
+    ),
+  );
 
-  const leading = cells[0]?.weekday ?? 0;
-  const padded: (GridCell | null)[] = [
-    ...Array.from({ length: leading }, () => null),
-    ...cells,
-  ];
+  const next = shiftBsMonth(year, month, 1);
+  const trailing = (7 - ((before.length + current.length) % 7)) % 7;
 
-  while (padded.length % 7 !== 0) {
-    padded.push(null);
-  }
+  const after = Array.from({ length: trailing }, (_, index) =>
+    cellFor(next.year, next.month, index + 1, false, todayKey),
+  );
 
+  const all = [...before, ...current, ...after];
   const weeks: GridCell[][] = [];
 
-  for (let index = 0; index < padded.length; index += 7) {
-    weeks.push(
-      padded.slice(index, index + 7).map(
-        (cell, offset) =>
-          cell ?? {
-            bsDay: 0,
-            ad: "",
-            adDay: 0,
-            weekday: offset,
-            inMonth: false,
-            isToday: false,
-            isSaturday: offset === 6,
-          },
-      ),
-    );
+  for (let index = 0; index < all.length; index += 7) {
+    weeks.push(all.slice(index, index + 7));
   }
 
   return weeks;
 }
+
+export function currentBsMonth(): { year: number; month: number } {
+  const now = toBs(new Date());
+
+  return { year: now.year, month: now.month };
+}
+
+export const BS_MONTH_NAMES_NE = [
+  "बैशाख",
+  "जेठ",
+  "असार",
+  "साउन",
+  "भदौ",
+  "असोज",
+  "कार्तिक",
+  "मंसिर",
+  "पुष",
+  "माघ",
+  "फागुन",
+  "चैत",
+] as const;
