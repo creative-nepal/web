@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/composed/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -17,6 +16,7 @@ import { ExportMenu } from "@/features/data-transfer/components/export-menu";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { money } from "@/lib/money";
 import { PeriodPicker, startOfDaysAgo } from "../components/period-picker";
+import { StatCards } from "../components/stat-cards";
 import { profitQueryOptions } from "../queries";
 
 export function ProfitReport({ businessId }: { businessId: string }) {
@@ -45,25 +45,17 @@ export function ProfitReport({ businessId }: { businessId: string }) {
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
+      <StatCards
+        stats={[
           { key: "revenue", value: money(totals?.revenueCents ?? 0) },
           { key: "cost", value: money(totals?.costCents ?? 0) },
           { key: "profit", value: money(totals?.profitCents ?? 0) },
           { key: "margin", value: `${totals?.marginPercent ?? 0}%` },
-        ].map((card) => (
-          <Card key={card.key}>
-            <CardContent className="flex flex-col gap-1 py-1">
-              <span className="text-muted-foreground text-xs">
-                {t(`ui.web.reports.${card.key}`)}
-              </span>
-              <span className="font-semibold text-xl tabular-nums">
-                {card.value}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        ].map((card) => ({
+          ...card,
+          label: t(`ui.web.reports.${card.key}`),
+        }))}
+      />
 
       {(data?.uncosted ?? 0) > 0 && (
         <Badge variant="outline" className="w-fit">

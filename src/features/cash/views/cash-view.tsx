@@ -5,18 +5,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/composed/empty-state";
 import { PageHeader } from "@/components/composed/page-header";
-import { SummaryList } from "@/components/summary-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -32,6 +23,8 @@ import { apiErrorMessage } from "@/lib/api-error";
 import { money } from "@/lib/money";
 import { CloseTillDialog } from "../components/close-till-dialog";
 import { MovementDialog } from "../components/movement-dialog";
+import { OpenTillCard } from "../components/open-till-card";
+import { SessionSummary } from "../components/session-summary";
 import {
   cashQueryKeys,
   cashSessionsQueryOptions,
@@ -103,147 +96,15 @@ export function CashView() {
             />
           }
         >
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.web.cash.openTitle")}</CardTitle>
-              <CardDescription>
-                {t("ui.web.cash.openingFloatHint")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-end gap-2">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="float">{t("ui.web.cash.openingFloat")}</Label>
-                <Input
-                  id="float"
-                  type="number"
-                  min={0}
-                  value={float}
-                  onChange={(event) => setFloat(event.target.value)}
-                  className="max-w-40"
-                />
-              </div>
-              <Button
-                disabled={float === "" || open.isPending}
-                onClick={() => open.mutate()}
-              >
-                {t("ui.web.cash.open")}
-              </Button>
-            </CardContent>
-          </Card>
+          <OpenTillCard
+            float={float}
+            isPending={open.isPending}
+            onFloatChange={setFloat}
+            onOpen={() => open.mutate()}
+          />
         </Can>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.web.cash.paymentMix")}</CardTitle>
-              <CardDescription>
-                {t("ui.web.cash.openedAt")}{" "}
-                {new Date(summary.session.openedAt).toLocaleString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("ui.web.cash.method")}</TableHead>
-                    <TableHead className="text-right">
-                      {t("ui.web.cash.transactions")}
-                    </TableHead>
-                    <TableHead className="text-right">
-                      {t("ui.web.cash.amount")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {summary.methodTotals.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={3}
-                        className="text-muted-foreground text-sm"
-                      >
-                        —
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    summary.methodTotals.map((total) => (
-                      <TableRow key={total.method}>
-                        <TableCell>
-                          {t(`common.paymentMethod.${total.method}`)}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {total.count}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {money(total.amountCents)}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-
-              {summary.movements.length > 0 && (
-                <div className="mt-6 flex flex-col gap-2">
-                  <h3 className="font-medium text-sm">
-                    {t("ui.web.cash.movements")}
-                  </h3>
-                  {summary.movements.map((movement) => (
-                    <div
-                      key={movement.id}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span className="text-muted-foreground">
-                        {movement.reason}
-                      </span>
-                      <span className="tabular-nums">
-                        {movement.direction === "out" ? "−" : "+"}
-                        {money(movement.amountCents)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="h-fit">
-            <CardContent className="pt-6">
-              <SummaryList
-                rows={[
-                  {
-                    label: t("ui.web.cash.openingFloat"),
-                    value: money(summary.session.openingFloatCents),
-                  },
-                  {
-                    label: t("ui.web.cash.cashSales"),
-                    value: money(summary.cashSalesCents),
-                  },
-                  ...(summary.paidInCents > 0
-                    ? [
-                        {
-                          label: t("ui.web.cash.paidIn"),
-                          value: money(summary.paidInCents),
-                        },
-                      ]
-                    : []),
-                  ...(summary.paidOutCents > 0
-                    ? [
-                        {
-                          label: t("ui.web.cash.paidOut"),
-                          value: `− ${money(summary.paidOutCents)}`,
-                        },
-                      ]
-                    : []),
-                  {
-                    label: t("ui.web.cash.expected"),
-                    value: money(summary.expectedCashCents),
-                    emphasis: true,
-                  },
-                ]}
-              />
-            </CardContent>
-          </Card>
-        </div>
+        <SessionSummary summary={summary} />
       )}
 
       {(history?.data.length ?? 0) > 0 && (

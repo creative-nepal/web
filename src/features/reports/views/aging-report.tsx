@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/composed/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,6 +14,7 @@ import {
 import { ExportMenu } from "@/features/data-transfer/components/export-menu";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { money } from "@/lib/money";
+import { StatCards } from "../components/stat-cards";
 import { agingQueryOptions } from "../queries";
 
 const BUCKETS = [
@@ -49,28 +49,21 @@ export function AgingReport({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {BUCKETS.map((bucket) => (
-          <Card key={bucket.key}>
-            <CardContent className="flex flex-col gap-1 py-1">
-              <span className="text-muted-foreground text-xs">
-                {t(`ui.web.reports.${bucket.label}`)}
-              </span>
-              <span className="font-semibold tabular-nums">
-                {money(totals?.[bucket.key] ?? 0)}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
-        <Card>
-          <CardContent className="flex flex-col gap-1 py-1">
-            <span className="text-muted-foreground text-xs">
-              {t("ui.web.reports.outstanding")}
-            </span>
-            <span className="font-semibold text-xl tabular-nums">
-              {money(totals?.totalCents ?? 0)}
-            </span>
-          </CardContent>
-        </Card>
+        <StatCards
+          className="contents"
+          stats={[
+            ...BUCKETS.map((bucket) => ({
+              key: bucket.key,
+              label: t(`ui.web.reports.${bucket.label}`),
+              value: money(totals?.[bucket.key] ?? 0),
+            })),
+            {
+              key: "outstanding",
+              label: t("ui.web.reports.outstanding"),
+              value: money(totals?.totalCents ?? 0),
+            },
+          ]}
+        />
       </div>
 
       {!isFetching && (data?.parties ?? []).length === 0 ? (

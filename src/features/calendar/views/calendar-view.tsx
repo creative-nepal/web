@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/composed/empty-state";
 import { PageHeader } from "@/components/composed/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentBusiness } from "@/features/business/business-provider";
 import { Can } from "@/features/business/components/can";
@@ -15,23 +14,15 @@ import {
   bsMonthWindow,
   currentBsMonth,
   shiftBsMonth,
-  toDevanagari,
 } from "@/lib/formatters/nepali-date";
 import { useLanguageStore } from "@/stores/language-store";
+import { AgendaList } from "../components/agenda-list";
+import { DayPanel } from "../components/day-panel";
 import { EventDialog } from "../components/event-dialog";
 import { MonthGrid } from "../components/month-grid";
 import { MonthHeader } from "../components/month-header";
 import { calendarFeedQueryOptions } from "../queries";
-import type { CalendarEntry, CalendarScope } from "../types";
-
-const SCOPE_VARIANT: Record<
-  CalendarScope,
-  "default" | "secondary" | "outline"
-> = {
-  organisation: "default",
-  branch: "secondary",
-  personal: "outline",
-};
+import type { CalendarEntry } from "../types";
 
 type Mode = "bs" | "ad";
 type Layout = "grid" | "list";
@@ -215,53 +206,11 @@ export function CalendarView() {
               onSelectDay={setSelectedDay}
             />
 
-            <div className="flex flex-col gap-3 rounded-lg border p-4">
-              {selectedDay ? (
-                <>
-                  <span className="font-medium text-sm">
-                    {language === "ne"
-                      ? (entriesByDay.get(selectedDay)?.[0]?.date.bsNepali ??
-                        toDevanagari(selectedDay))
-                      : (entriesByDay.get(selectedDay)?.[0]?.date.bsLong ??
-                        selectedDay)}
-                  </span>
-                  <span className="text-muted-foreground text-xs tabular-nums">
-                    {selectedDay}
-                  </span>
-
-                  {selectedEntries.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">
-                      {t("ui.web.calendar.empty")}
-                    </p>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      {selectedEntries.map((entry) => (
-                        <div
-                          key={entry.id}
-                          className="flex flex-col gap-1 rounded-lg border p-2"
-                        >
-                          <span className="text-sm">{entry.title}</span>
-                          <div className="flex flex-wrap gap-1">
-                            <Badge variant={SCOPE_VARIANT[entry.scope]}>
-                              {t(`ui.web.calendar.${entry.scope}`)}
-                            </Badge>
-                            {entry.source !== "event" && (
-                              <Badge variant="outline">
-                                {t(`ui.web.calendar.${entry.source}`)}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  {t("ui.web.calendar.noPanchang")}
-                </p>
-              )}
-            </div>
+            <DayPanel
+              selectedDay={selectedDay}
+              entries={selectedEntries}
+              language={language}
+            />
           </div>
         </div>
       ) : !isFetching && grouped.length === 0 ? (
@@ -270,61 +219,7 @@ export function CalendarView() {
           description={t("ui.web.calendar.emptyHint")}
         />
       ) : (
-        <div className="flex flex-col gap-4">
-          {grouped.map(([day, dayEntries]) => {
-            const date = dayEntries[0].date;
-
-            return (
-              <div key={day} className="flex gap-4">
-                <div className="flex w-40 shrink-0 flex-col pt-1">
-                  <span className="font-medium text-sm">
-                    {language === "ne" ? date.bsNepali : date.bsLong}
-                  </span>
-                  <span className="text-muted-foreground text-xs tabular-nums">
-                    {new Date(`${date.ad}T00:00:00Z`).toLocaleDateString(
-                      undefined,
-                      {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                        timeZone: "UTC",
-                      },
-                    )}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col gap-2">
-                  {dayEntries.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="flex items-center gap-3 rounded-lg border p-3"
-                    >
-                      <span className="w-14 shrink-0 text-muted-foreground text-xs tabular-nums">
-                        {entry.allDay
-                          ? "\u2014"
-                          : new Date(entry.startsAt).toLocaleTimeString(
-                              undefined,
-                              { hour: "2-digit", minute: "2-digit" },
-                            )}
-                      </span>
-                      <span className="flex-1 truncate text-sm">
-                        {entry.title}
-                      </span>
-                      {entry.source !== "event" && (
-                        <Badge variant="outline">
-                          {t(`ui.web.calendar.${entry.source}`)}
-                        </Badge>
-                      )}
-                      <Badge variant={SCOPE_VARIANT[entry.scope]}>
-                        {t(`ui.web.calendar.${entry.scope}`)}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <AgendaList days={grouped} language={language} />
       )}
 
       <EventDialog
