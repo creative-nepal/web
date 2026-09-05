@@ -32,12 +32,10 @@ export function ReportsView() {
 
   return (
     <div className="flex flex-col gap-6">
-      {tab === "live" ? null : (
-        <PageHeader
-          title={t(`ui.web.reports.tab.${tab}`)}
-          description={t(`ui.web.reports.${tab}Description`)}
-        />
-      )}
+      <PageHeader
+        title={t(`ui.web.reports.tab.${tab}`)}
+        description={t(`ui.web.reports.${tab}Description`)}
+      />
 
       <div className="flex flex-wrap gap-1">
         {TABS.map((entry) => (

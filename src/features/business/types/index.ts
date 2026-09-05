@@ -39,8 +39,12 @@ export interface Entitlements {
   featureFlags: Record<string, unknown>;
 }
 
+export const NAV_GROUPS = ["counter", "stock", "money", "setup"] as const;
+export type NavGroup = (typeof NAV_GROUPS)[number];
+
 export interface WorkspaceNavItem {
   key: string;
+  group: NavGroup;
   href: string;
   titleKey: string;
 }

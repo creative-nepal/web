@@ -18,6 +18,7 @@ import {
 import { BusinessSwitcher } from "@/features/business/components/business-switcher";
 import { WorkspaceTheme } from "@/features/business/components/workspace-theme";
 import { useWorkspace } from "@/features/business/hooks/use-workspace";
+import { NAV_GROUPS } from "@/features/business/types";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 
@@ -47,12 +48,19 @@ function WorkspaceChrome({ children }: { children: React.ReactNode }) {
   const items: DashboardShellNavItem[] = (workspace?.nav ?? []).map((item) => ({
     title: t(item.titleKey),
     href: item.href,
+    group: item.group,
     isActive: pathname.startsWith(item.href),
+  }));
+
+  const groups = NAV_GROUPS.map((key) => ({
+    key,
+    label: t(`ui.web.nav.group.${key}`),
   }));
 
   return (
     <DashboardShell
       navItems={items}
+      navGroups={groups}
       header={
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">

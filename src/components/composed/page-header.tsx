@@ -17,16 +17,27 @@ function PageHeader({
   return (
     <div
       data-slot="page-header"
-      className={cn("flex items-center justify-between gap-4", className)}
+      className={cn(
+        "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4",
+        className,
+      )}
       {...props}
     >
-      <div className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+      <div className="flex min-w-0 flex-col gap-1">
+        <h1 className="font-heading font-semibold text-foreground text-xl leading-tight">
+          {title}
+        </h1>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="max-w-prose text-muted-foreground text-sm">
+            {description}
+          </p>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

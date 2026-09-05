@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { PageHeader } from "@/components/composed/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,61 +55,56 @@ export function LiveSalesView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("ui.web.reports.liveSalesTitle")}
-        description={t("ui.web.reports.liveSalesDescription")}
-        actions={
-          <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={businessDate}
-              onChange={(event) => setBusinessDate(event.target.value)}
-              className="h-9 rounded-md border bg-transparent px-3 text-sm"
-            />
-            {businessDate && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBusinessDate("")}
-              >
-                {t("ui.web.reports.today")}
-              </Button>
-            )}
-            {!businessDate && (
-              <Badge variant={isFetching ? "default" : "outline"}>
-                {t("ui.web.reports.live")}
-              </Badge>
-            )}
-          </div>
-        }
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+        <div className="flex flex-wrap items-baseline gap-2 text-muted-foreground text-xs">
+          <span>
+            {data
+              ? formatBs(
+                  new Date(`${data.businessDate}T00:00:00Z`),
+                  language === "ne" ? "ne" : "en",
+                )
+              : ""}
+          </span>
+          <span>·</span>
+          <span className="tabular-nums">{data?.businessDate}</span>
+          <span>·</span>
+          <span>{data?.timezone}</span>
+          {dataUpdatedAt > 0 && (
+            <>
+              <span>·</span>
+              <span>
+                {t("ui.web.reports.updatedAt", {
+                  time: new Date(dataUpdatedAt).toLocaleTimeString(undefined, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                })}
+              </span>
+            </>
+          )}
+        </div>
 
-      <div className="flex flex-wrap items-baseline gap-2 text-muted-foreground text-xs">
-        <span>
-          {data
-            ? formatBs(
-                new Date(`${data.businessDate}T00:00:00Z`),
-                language === "ne" ? "ne" : "en",
-              )
-            : ""}
-        </span>
-        <span>·</span>
-        <span className="tabular-nums">{data?.businessDate}</span>
-        <span>·</span>
-        <span>{data?.timezone}</span>
-        {dataUpdatedAt > 0 && (
-          <>
-            <span>·</span>
-            <span>
-              {t("ui.web.reports.updatedAt", {
-                time: new Date(dataUpdatedAt).toLocaleTimeString(undefined, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-              })}
-            </span>
-          </>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={businessDate}
+            onChange={(event) => setBusinessDate(event.target.value)}
+            className="h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+          />
+          {businessDate ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setBusinessDate("")}
+            >
+              {t("ui.web.reports.today")}
+            </Button>
+          ) : (
+            <Badge variant={isFetching ? "default" : "outline"}>
+              {t("ui.web.reports.live")}
+            </Badge>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

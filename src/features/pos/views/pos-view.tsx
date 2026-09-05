@@ -147,7 +147,7 @@ export function PosView() {
         }`}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex flex-col gap-4">
           <SearchInput
             value={search}
@@ -164,47 +164,49 @@ export function PosView() {
           />
         </div>
 
-        <CartPanel
-          lines={cart.lines}
-          totals={cart.totals}
-          vatRegistered={business.vatRegistered}
-          discountPercent={cart.discountPercent}
-          maxDiscountPercent={cart.maxDiscountPercent}
-          onDiscountPercentChange={cart.setDiscountPercent}
-          onQuantityChange={cart.setQuantity}
-          onNoteChange={cart.setNote}
-          canSubmit={canSubmit}
-          isSubmitting={submit.isPending}
-          onSubmit={() => submit.mutate()}
-        >
-          <ChannelPicker
-            channels={(channels?.data ?? []).filter(
-              (channel) => channel.isActive,
-            )}
-            value={channelId}
-            onChange={setChannelId}
-          />
+        <div className="lg:sticky lg:top-20">
+          <CartPanel
+            lines={cart.lines}
+            totals={cart.totals}
+            vatRegistered={business.vatRegistered}
+            discountPercent={cart.discountPercent}
+            maxDiscountPercent={cart.maxDiscountPercent}
+            onDiscountPercentChange={cart.setDiscountPercent}
+            onQuantityChange={cart.setQuantity}
+            onNoteChange={cart.setNote}
+            canSubmit={canSubmit}
+            isSubmitting={submit.isPending}
+            onSubmit={() => submit.mutate()}
+          >
+            <ChannelPicker
+              channels={(channels?.data ?? []).filter(
+                (channel) => channel.isActive,
+              )}
+              value={channelId}
+              onChange={setChannelId}
+            />
 
-          <PaymentPanel
-            totalCents={cart.totals.totalCents}
-            method={method}
-            onMethodChange={setMethod}
-            reference={reference}
-            onReferenceChange={setReference}
-            tillOpen={Boolean(till)}
-          />
+            <PaymentPanel
+              totalCents={cart.totals.totalCents}
+              method={method}
+              onMethodChange={setMethod}
+              reference={reference}
+              onReferenceChange={setReference}
+              tillOpen={Boolean(till)}
+            />
 
-          <ComplianceFields
-            businessId={business.id}
-            value={compliance}
-            onChange={(patch) =>
-              setCompliance((current) => ({ ...current, ...patch }))
-            }
-            requiresBuyerPan={cart.requiresBuyerPan}
-            requiresPrescription={cart.requiresPrescription}
-            requiresBuyerIdentity={cart.requiresBuyerIdentity}
-          />
-        </CartPanel>
+            <ComplianceFields
+              businessId={business.id}
+              value={compliance}
+              onChange={(patch) =>
+                setCompliance((current) => ({ ...current, ...patch }))
+              }
+              requiresBuyerPan={cart.requiresBuyerPan}
+              requiresPrescription={cart.requiresPrescription}
+              requiresBuyerIdentity={cart.requiresBuyerIdentity}
+            />
+          </CartPanel>
+        </div>
       </div>
 
       <SubstitutesDialog

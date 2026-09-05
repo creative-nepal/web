@@ -1,7 +1,10 @@
 "use client";
 
+import { RiSearchLine } from "@remixicon/react";
+import { EmptyState } from "@/components/composed/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { isPacked, unitLabel } from "@/features/products/pack-pricing";
 import type { Product } from "@/features/products/types";
@@ -22,11 +25,23 @@ export function ProductGrid({
 }: ProductGridProps) {
   const { t } = useTranslation();
 
-  if (!isLoading && products.length === 0) {
+  if (isLoading && products.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
-        {t("ui.web.pos.noProducts")}
-      </p>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }, (_, index) => index).map((index) => (
+          <Skeleton key={index} className="h-28 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <EmptyState
+        icon={<RiSearchLine />}
+        title={t("ui.web.pos.noProducts")}
+        description={t("ui.web.pos.noProductsHint")}
+      />
     );
   }
 

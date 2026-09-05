@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/features/cash/types";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { money } from "@/lib/money";
@@ -37,22 +37,28 @@ export function PaymentPanel({
   return (
     <div className="flex flex-col gap-2">
       <Label>{t("ui.web.cash.payment")}</Label>
-      <div className="flex flex-wrap gap-1.5">
+      <ToggleGroup
+        variant="outline"
+        size="sm"
+        multiple={false}
+        value={method ? [method] : []}
+        onValueChange={(value) =>
+          onMethodChange((value[0] as PaymentMethod | undefined) ?? null)
+        }
+        className="flex-wrap"
+      >
         {PAYMENT_METHODS.filter((entry) => COUNTER_METHODS.includes(entry)).map(
           (entry) => (
-            <Button
+            <ToggleGroupItem
               key={entry}
-              type="button"
-              size="sm"
-              variant={method === entry ? "default" : "outline"}
+              value={entry}
               disabled={entry === "cash" && !tillOpen}
-              onClick={() => onMethodChange(method === entry ? null : entry)}
             >
               {t(`common.paymentMethod.${entry}`)}
-            </Button>
+            </ToggleGroupItem>
           ),
         )}
-      </div>
+      </ToggleGroup>
 
       {needsReference && (
         <Input
