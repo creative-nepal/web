@@ -1,8 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { EmptyState } from "@/components/composed/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -32,20 +36,50 @@ export function AgingReport({
   kind: "receivables" | "payables";
 }) {
   const { t } = useTranslation();
+  const [asOf, setAsOf] = useState("");
 
   const { data, isFetching } = useQuery(
-    agingQueryOptions(businessId, kind, ""),
+    agingQueryOptions(
+      businessId,
+      kind,
+      asOf ? new Date(`${asOf}T23:59:59`).toISOString() : "",
+    ),
   );
 
   const totals = data?.totals;
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-muted-foreground text-sm">
-          {t(`ui.web.reports.${kind}Hint`)}
-        </span>
-        <ExportMenu businessId={businessId} resource={`reports/${kind}`} />
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="agingAsOf">{t("ui.web.reports.asOf")}</Label>
+            <Input
+              id="agingAsOf"
+              type="date"
+              value={asOf}
+              onChange={(event) => setAsOf(event.target.value)}
+              className="w-44"
+            />
+          </div>
+          {asOf && (
+            <Button variant="ghost" onClick={() => setAsOf("")}>
+              {t("ui.web.reports.asOfToday")}
+            </Button>
+          )}
+          <p className="pb-2 text-muted-foreground text-sm">
+            {t(`ui.web.reports.${kind}Hint`)} {t("ui.web.reports.asOfHint")}
+          </p>
+        </div>
+        <ExportMenu
+          businessId={businessId}
+          resource={`reports/${kind}`}
+          params={
+            asOf
+              ? { asOf: new Date(`${asOf}T23:59:59`).toISOString() }
+              : undefined
+          }
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

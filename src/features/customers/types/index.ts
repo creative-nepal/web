@@ -10,12 +10,16 @@ export interface Customer {
   createdAt: string;
 }
 
+export type LedgerEntryType = "sale" | "payment" | "adjustment";
+
 export interface LedgerEntry {
   id: string;
-  type: "sale" | "payment" | "adjustment";
+  type: LedgerEntryType;
   amountCents: number;
   balanceAfterCents: number;
   invoiceId: string | null;
+  method: string | null;
+  cashSessionId: string | null;
   note: string | null;
   createdAt: string;
 }

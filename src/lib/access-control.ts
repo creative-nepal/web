@@ -9,15 +9,38 @@ import {
   memberAc as orgMemberAc,
 } from "better-auth/plugins/organization/access";
 
-export const statement = {
-  ...defaultStatements,
+const kernelStatements = {
   business: ["manage"],
   product: ["create", "update", "delete"],
-  order: ["create", "refund", "confirm", "serve"],
+  order: ["create", "refund", "confirm", "serve", "discount"],
   invoice: ["issue", "print", "credit-note"],
+  stocktake: ["open", "count", "complete"],
+  cash: ["view", "open", "close", "move", "take-payment"],
+  wastage: ["view", "record"],
+  expense: ["view", "record"],
+  calendar: ["view", "manage"],
+  report: ["view"],
+  production: ["view", "plan", "record"],
+} as const;
+
+const sectorStatements = {
   dispense: ["prescription", "controlled"],
+  recall: ["view", "quarantine"],
   table: ["manage"],
   kot: ["view", "update"],
+  reservation: ["view", "book", "seat", "cancel"],
+  appointment: ["book", "complete", "cancel"],
+  membership: ["manage"],
+  room: ["manage"],
+  booking: ["book", "check-in", "check-out", "cancel"],
+  folio: ["post", "settle"],
+  housekeeping: ["view", "update"],
+} as const;
+
+export const statement = {
+  ...defaultStatements,
+  ...kernelStatements,
+  ...sectorStatements,
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -28,41 +51,84 @@ export const ownerRole = ac.newRole({
   invitation: ["create", "cancel"],
   team: ["create", "update", "delete"],
   ac: ["create", "read", "update", "delete"],
-  business: ["manage"],
-  product: ["create", "update", "delete"],
-  order: ["create", "refund", "confirm", "serve"],
-  invoice: ["issue", "print", "credit-note"],
-  dispense: ["prescription", "controlled"],
-  table: ["manage"],
-  kot: ["view", "update"],
+  ...kernelStatements,
+  ...sectorStatements,
 });
 
 export const managerRole = ac.newRole({
   product: ["create", "update", "delete"],
-  order: ["create", "refund", "confirm", "serve"],
+  order: ["create", "refund", "confirm", "serve", "discount"],
   invoice: ["issue", "print", "credit-note"],
+  stocktake: ["open", "count", "complete"],
+  cash: ["view", "open", "close", "move", "take-payment"],
+  wastage: ["view", "record"],
+  expense: ["view", "record"],
+  calendar: ["view", "manage"],
+  report: ["view"],
+  production: ["view", "plan", "record"],
+  recall: ["view", "quarantine"],
   table: ["manage"],
   kot: ["view", "update"],
+  reservation: ["view", "book", "seat", "cancel"],
+  appointment: ["book", "complete", "cancel"],
+  membership: ["manage"],
+  room: ["manage"],
+  booking: ["book", "check-in", "check-out", "cancel"],
+  folio: ["post", "settle"],
+  housekeeping: ["view", "update"],
 });
 
 export const cashierRole = ac.newRole({
   order: ["create"],
   invoice: ["issue", "print"],
+  cash: ["view", "open", "close", "move", "take-payment"],
+  calendar: ["view"],
+  report: ["view"],
 });
 
 export const pharmacistRole = ac.newRole({
   order: ["create"],
   invoice: ["issue", "print"],
   dispense: ["prescription", "controlled"],
+  recall: ["view"],
 });
 
 export const waiterRole = ac.newRole({
   order: ["create", "confirm", "serve"],
   table: ["manage"],
   kot: ["view"],
+  reservation: ["view", "book", "seat"],
+  wastage: ["view", "record"],
 });
 
-export const chefRole = ac.newRole({ kot: ["view", "update"] });
+export const chefRole = ac.newRole({
+  kot: ["view", "update"],
+  wastage: ["view", "record"],
+});
+
+export const receptionistRole = ac.newRole({
+  order: ["create"],
+  invoice: ["issue", "print"],
+  appointment: ["book", "cancel"],
+  membership: ["manage"],
+});
+
+export const practitionerRole = ac.newRole({
+  appointment: ["complete"],
+});
+
+export const frontDeskRole = ac.newRole({
+  order: ["create"],
+  invoice: ["issue", "print"],
+  booking: ["book", "check-in", "check-out", "cancel"],
+  folio: ["post", "settle"],
+  housekeeping: ["view"],
+  calendar: ["view"],
+});
+
+export const housekeeperRole = ac.newRole({
+  housekeeping: ["view", "update"],
+});
 
 export const roles = {
   admin: orgAdminAc,
@@ -73,6 +139,10 @@ export const roles = {
   pharmacist: pharmacistRole,
   waiter: waiterRole,
   chef: chefRole,
+  receptionist: receptionistRole,
+  practitioner: practitionerRole,
+  frontDesk: frontDeskRole,
+  housekeeper: housekeeperRole,
 };
 
 export const platformStatement = {
@@ -110,4 +180,10 @@ export const superAdminRole = platformAc.newRole({
 export const platformRoles = {
   admin: superAdminRole,
   user: platformUserAc,
+};
+
+export type PlatformPermissionRequest = {
+  [K in keyof typeof platformStatement]?: Array<
+    (typeof platformStatement)[K][number]
+  >;
 };

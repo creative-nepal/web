@@ -34,11 +34,15 @@ export function StockMovementReport({ businessId }: { businessId: string }) {
   const { t } = useTranslation();
 
   const [days, setDays] = useState(30);
+  const [anchor, setAnchor] = useState(() => Date.now());
   const [productId, setProductId] = useState("");
 
   const range = useMemo(
-    () => ({ from: startOfDaysAgo(days), to: new Date().toISOString() }),
-    [days],
+    () => ({
+      from: startOfDaysAgo(days, anchor),
+      to: new Date(anchor).toISOString(),
+    }),
+    [days, anchor],
   );
 
   const { data: products } = useQuery(productsQueryOptions(businessId, ""));
@@ -66,7 +70,13 @@ export function StockMovementReport({ businessId }: { businessId: string }) {
               </NativeSelectOption>
             ))}
           </NativeSelect>
-          <PeriodPicker days={days} onChange={setDays} />
+          <PeriodPicker
+            days={days}
+            onChange={(next) => {
+              setDays(next);
+              setAnchor(Date.now());
+            }}
+          />
         </div>
         {productId && (
           <ExportMenu

@@ -21,6 +21,15 @@ export interface Expense {
   reference: string | null;
   cashSessionId: string | null;
   incurredAt: string;
+  voidedAt: string | null;
+  voidReason: string | null;
+}
+
+export interface ExpenseFilters {
+  category: ExpenseCategory | null;
+  includeVoided: boolean;
+  from: string;
+  to: string;
 }
 
 export interface ExpenseReport {

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
 import { apiErrorMessage } from "@/lib/api-error";
+import { parseAmountToCents } from "@/lib/money";
 import { cashQueryKeys } from "../queries";
 import { addMovement } from "../services";
 
@@ -43,12 +44,14 @@ export function MovementDialog({
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
 
+  const amountCents = amount.trim() === "" ? null : parseAmountToCents(amount);
+
   const save = useMutation({
     mutationFn: () =>
       addMovement(businessId, sessionId, {
         direction,
-        amountCents: Math.round(Number(amount) * 100),
-        reason,
+        amountCents: amountCents ?? 0,
+        reason: reason.trim(),
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: cashQueryKeys.all });
@@ -57,7 +60,8 @@ export function MovementDialog({
       onOpenChange(false);
       toast.success(t("ui.web.cash.movementAdded"));
     },
-    onError: (error) => toast.error(apiErrorMessage(error)),
+    onError: (error) =>
+      toast.error(apiErrorMessage(error, t("ui.error.generic"))),
   });
 
   return (
@@ -88,11 +92,16 @@ export function MovementDialog({
             <Label htmlFor="amount">{t("ui.web.cash.amount")}</Label>
             <Input
               id="amount"
-              type="number"
-              min={0}
+              inputMode="decimal"
               value={amount}
+              aria-invalid={amount.trim() !== "" && amountCents === null}
               onChange={(event) => setAmount(event.target.value)}
             />
+            {amount.trim() !== "" && amountCents === null && (
+              <p className="text-destructive text-xs">
+                {t("ui.web.cash.amountInvalid")}
+              </p>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="reason">{t("ui.web.cash.reason")}</Label>
@@ -105,7 +114,12 @@ export function MovementDialog({
         </div>
         <DialogFooter>
           <Button
-            disabled={amount === "" || !reason.trim() || save.isPending}
+            disabled={
+              amountCents === null ||
+              amountCents === 0 ||
+              !reason.trim() ||
+              save.isPending
+            }
             onClick={() => save.mutate()}
           >
             {t("ui.action.save")}

@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/features/i18n/hooks/use-translation";
+import { parseAmountToCents } from "@/lib/money";
 
 export function OpenTillCard({
   float,
@@ -25,6 +26,8 @@ export function OpenTillCard({
 }) {
   const { t } = useTranslation();
 
+  const invalid = float.trim() !== "" && parseAmountToCents(float) === null;
+
   return (
     <Card>
       <CardHeader>
@@ -36,14 +39,22 @@ export function OpenTillCard({
           <Label htmlFor="float">{t("ui.web.cash.openingFloat")}</Label>
           <Input
             id="float"
-            type="number"
-            min={0}
+            inputMode="decimal"
             value={float}
+            aria-invalid={invalid}
             onChange={(event) => onFloatChange(event.target.value)}
             className="max-w-40"
           />
+          {invalid && (
+            <p className="text-destructive text-xs">
+              {t("ui.web.cash.openingFloatInvalid")}
+            </p>
+          )}
         </div>
-        <Button disabled={float === "" || isPending} onClick={onOpen}>
+        <Button
+          disabled={float.trim() === "" || invalid || isPending}
+          onClick={onOpen}
+        >
           {t("ui.web.cash.open")}
         </Button>
       </CardContent>

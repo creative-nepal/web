@@ -7,7 +7,6 @@ interface PaginationControlsProps {
   page: number;
   pageSize: number;
   total: number;
-  noun: string;
   onPageChange: (page: number) => void;
 }
 
@@ -15,7 +14,6 @@ export function PaginationControls({
   page,
   pageSize,
   total,
-  noun,
   onPageChange,
 }: PaginationControlsProps) {
   const { t } = useTranslation();
@@ -23,8 +21,7 @@ export function PaginationControls({
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground text-sm">
-        {total} {noun}
-        {total === 1 ? "" : "s"}
+        {t("ui.field.resultCount", { count: total })}
       </span>
       <div className="flex gap-2">
         <Button

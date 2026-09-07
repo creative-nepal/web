@@ -1,3 +1,4 @@
+import type { TenderMethod } from "@/features/cash/types";
 import { api } from "@/lib/api";
 import type { PaginatedResult } from "@/types/api";
 import type { Customer, LedgerEntry } from "./types";
@@ -43,12 +44,11 @@ export async function getLedger(
 export async function recordPayment(
   businessId: string,
   customerId: string,
-  amountCents: number,
-  note?: string,
+  input: { amountCents: number; method: TenderMethod; note?: string },
 ): Promise<LedgerEntry> {
   const { data } = await api.post<LedgerEntry>(
     `/api/v1/businesses/${businessId}/customers/${customerId}/payments`,
-    { amountCents, note },
+    input,
   );
   return data;
 }

@@ -11,17 +11,37 @@ export const PAYMENT_METHODS = [
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
+export const TENDER_METHODS = PAYMENT_METHODS.filter(
+  (method) => method !== "credit",
+) as readonly Exclude<PaymentMethod, "credit">[];
+
+export type TenderMethod = (typeof TENDER_METHODS)[number];
+
+export const NPR_DENOMINATIONS = [1000, 500, 100, 50, 20, 10, 5, 2, 1] as const;
+
+export type DenominationCount = Record<string, number>;
+
 export interface Payment {
-  method: PaymentMethod;
+  method: TenderMethod;
   amountCents: number;
   reference?: string;
 }
 
-export interface InvoicePayment extends Payment {
+export interface InvoicePayment {
   id: string;
   invoiceId: string;
   cashSessionId: string | null;
+  method: string;
+  amountCents: number;
+  reference: string | null;
   createdAt: string;
+}
+
+export interface SettlementResult {
+  payments: InvoicePayment[];
+  invoiceTotalCents: number;
+  paidCents: number;
+  dueCents: number;
 }
 
 export interface CashSession {
@@ -32,6 +52,7 @@ export interface CashSession {
   openingFloatCents: number;
   openedAt: string;
   countedCashCents: number | null;
+  countedDenominations: DenominationCount | null;
   expectedCashCents: number | null;
   varianceCents: number | null;
   closedAt: string | null;

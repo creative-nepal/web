@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/composed/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,10 +23,14 @@ import { profitQueryOptions } from "../queries";
 export function ProfitReport({ businessId }: { businessId: string }) {
   const { t } = useTranslation();
   const [days, setDays] = useState(30);
+  const [anchor, setAnchor] = useState(() => Date.now());
 
   const range = useMemo(
-    () => ({ from: startOfDaysAgo(days), to: new Date().toISOString() }),
-    [days],
+    () => ({
+      from: startOfDaysAgo(days, anchor),
+      to: new Date(anchor).toISOString(),
+    }),
+    [days, anchor],
   );
 
   const { data, isFetching } = useQuery(
@@ -37,7 +42,13 @@ export function ProfitReport({ businessId }: { businessId: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PeriodPicker days={days} onChange={setDays} />
+        <PeriodPicker
+          days={days}
+          onChange={(next) => {
+            setDays(next);
+            setAnchor(Date.now());
+          }}
+        />
         <ExportMenu
           businessId={businessId}
           resource="reports/profit"
@@ -49,13 +60,39 @@ export function ProfitReport({ businessId }: { businessId: string }) {
         stats={[
           { key: "revenue", value: money(totals?.revenueCents ?? 0) },
           { key: "cost", value: money(totals?.costCents ?? 0) },
-          { key: "profit", value: money(totals?.profitCents ?? 0) },
-          { key: "margin", value: `${totals?.marginPercent ?? 0}%` },
+          { key: "grossProfit", value: money(totals?.profitCents ?? 0) },
+          { key: "expenses", value: money(totals?.expensesCents ?? 0) },
+          { key: "netProfit", value: money(totals?.netProfitCents ?? 0) },
+          { key: "netMargin", value: `${totals?.netMarginPercent ?? 0}%` },
         ].map((card) => ({
           ...card,
           label: t(`ui.web.reports.${card.key}`),
         }))}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.web.reports.expenseBreakdown")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-4">
+          {(data?.expenses ?? []).length === 0 ? (
+            <span className="text-muted-foreground text-sm">
+              {t("ui.web.reports.noExpenses")}
+            </span>
+          ) : (
+            (data?.expenses ?? []).map((line) => (
+              <div key={line.category} className="flex flex-col">
+                <span className="text-muted-foreground text-xs">
+                  {t(`common.expenseCategory.${line.category}`)}
+                </span>
+                <span className="font-medium tabular-nums">
+                  {money(line.amountCents)}
+                </span>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {(data?.uncosted ?? 0) > 0 && (
         <Badge variant="outline" className="w-fit">

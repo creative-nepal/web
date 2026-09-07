@@ -1,11 +1,14 @@
 import { api } from "@/lib/api";
+import { downloadFile } from "@/lib/download";
 import type { PaginatedResult } from "@/types/api";
 import type {
   CashMovement,
   CashSession,
   CashSessionSummary,
+  DenominationCount,
   InvoicePayment,
   Payment,
+  SettlementResult,
 } from "./types";
 
 export async function getCurrentSession(
@@ -19,13 +22,45 @@ export async function getCurrentSession(
 
 export async function listSessions(
   businessId: string,
-  params: { status?: string; limit?: number } = {},
+  params: { status?: string; limit?: number; offset?: number } = {},
 ): Promise<PaginatedResult<CashSession>> {
   const { data } = await api.get<PaginatedResult<CashSession>>(
     `/api/v1/businesses/${businessId}/cash-sessions`,
     { params },
   );
   return data;
+}
+
+export async function getSession(
+  businessId: string,
+  sessionId: string,
+): Promise<CashSessionSummary> {
+  const { data } = await api.get<CashSessionSummary>(
+    `/api/v1/businesses/${businessId}/cash-sessions/${sessionId}`,
+  );
+  return data;
+}
+
+export async function listSessionPayments(
+  businessId: string,
+  sessionId: string,
+): Promise<InvoicePayment[]> {
+  const { data } = await api.get<InvoicePayment[]>(
+    `/api/v1/businesses/${businessId}/cash-sessions/${sessionId}/payments`,
+  );
+  return data;
+}
+
+export function downloadSessions(
+  businessId: string,
+  format: "xlsx" | "csv",
+  status?: string,
+): Promise<void> {
+  return downloadFile(
+    `/api/v1/businesses/${businessId}/cash-sessions/export`,
+    { format, ...(status ? { status } : {}) },
+    `cash-sessions.${format}`,
+  );
 }
 
 export async function openSession(
@@ -54,12 +89,15 @@ export async function addMovement(
 export async function closeSession(
   businessId: string,
   sessionId: string,
-  countedCashCents: number,
-  note?: string,
+  input: {
+    countedCashCents?: number;
+    denominations?: DenominationCount;
+    note?: string;
+  },
 ): Promise<CashSessionSummary> {
   const { data } = await api.post<CashSessionSummary>(
     `/api/v1/businesses/${businessId}/cash-sessions/${sessionId}/close`,
-    { countedCashCents, ...(note ? { note } : {}) },
+    input,
   );
   return data;
 }
@@ -78,8 +116,8 @@ export async function settleInvoice(
   businessId: string,
   invoiceId: string,
   payments: Payment[],
-): Promise<InvoicePayment[]> {
-  const { data } = await api.post<InvoicePayment[]>(
+): Promise<SettlementResult> {
+  const { data } = await api.post<SettlementResult>(
     `/api/v1/businesses/${businessId}/invoices/${invoiceId}/payments`,
     { payments },
   );

@@ -6,8 +6,8 @@ export const INVOICE_STATUS_VARIANTS = {
   voided: "destructive",
 } as const;
 
-export const INVOICE_STATUS_LABELS = {
-  issued: "Issued",
-  credit_note: "Credit note",
-  voided: "Voided",
+export const INVOICE_SETTLEMENT_VARIANTS = {
+  unpaid: "destructive",
+  partial: "secondary",
+  paid: "outline",
 } as const;

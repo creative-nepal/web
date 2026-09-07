@@ -49,6 +49,11 @@ export interface ProfitLine {
   marginPercent: number;
 }
 
+export interface ExpenseLine {
+  category: string;
+  amountCents: number;
+}
+
 export interface ProfitReport {
   from: string;
   to: string;
@@ -57,8 +62,12 @@ export interface ProfitReport {
     costCents: number;
     profitCents: number;
     marginPercent: number;
+    expensesCents: number;
+    netProfitCents: number;
+    netMarginPercent: number;
   };
   lines: ProfitLine[];
+  expenses: ExpenseLine[];
   uncosted: number;
 }
 
